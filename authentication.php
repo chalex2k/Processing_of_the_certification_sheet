@@ -21,7 +21,7 @@
       $row = $result->fetch_array(MYSQLI_NUM);
 
       $result->close();
-      if ($password_temp == $row[1])#(password_verify($password_temp, $row[1]))
+      if ($password_temp == $row[2])#(password_verify($password_temp, $row[1]))
       {
         session_start();
         $_SESSION["username"] = $email_temp;
