@@ -39,8 +39,12 @@
 
 <?php
 	require_once 'login.php';
+	require_once 'encrypt.php';
+	require_once 'functions.php';
 	$connection = new mysqli($hostname, $username, $password, $database);
 	if ($connection->connect_error) die($connection->connect_error);
+
+	query_mysql($connection, "SET NAMES utf8");
 
 	$error = $name = $surname = $midname = $email = $password = $role = "";
 	#$semester = $group = NULL;
@@ -58,6 +62,8 @@
 		$password = sanitize_string($connection, $_POST['password']);
 		$role = $_POST['role'];
 
+		$token = new_token($password);
+
 		if (isset($_POST['semester']) && isset($_POST['group']))
 		{
 			$semester = $_POST['semester'];
@@ -69,7 +75,7 @@
 			echo $error = "Этот e-mail уже зарегистрирован<br><br>";
 		else
 		{
-			query_mysql($connection, "INSERT INTO user(email, password, surname, name, middle_name, role) VALUES('$email', '$password',
+			query_mysql($connection, "INSERT INTO user(email, password, surname, name, middle_name, role) VALUES('$email', '$token',
 															 '$surname', '$name',
 															 '$midname', '$role')");
 			if ($role == 'student')
@@ -89,20 +95,5 @@
 	}
 
 	$connection->close();
-
-	function query_mysql($connection, $query)
-	{
-		$result = $connection->query($query);
-		if (!$result) die ($connection->error);
-		return $result;
-	}
-
-	function sanitize_string($connection, $str)
-	{
-		$str = strip_tags($str);
-		$str = htmlentities($str);
-		$str = stripslashes($str);
-		return $connection->real_escape_string($str);
-	}
 
 ?>
