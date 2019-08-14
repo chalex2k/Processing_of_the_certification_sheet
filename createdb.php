@@ -2,6 +2,10 @@
   require_once 'login.php';
   $conn = new mysqli($hostname, $username, $password, $database);
   if ($conn->connect_error) die("Fatal Error");
+
+  $query = "SET NAMES utf8";
+  $result = $conn->query($query);
+  if (!$result) die ('<br> Ошибка при установке кодировки');
   
   $query = "CREATE TABLE user (
     id SMALLINT NOT NULL AUTO_INCREMENT,

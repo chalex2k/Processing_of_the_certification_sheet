@@ -3,6 +3,10 @@ require_once 'login.php';
 $conn = new mysqli($hostname, $username, $password, $database);
 if ($conn->connect_error) die("Fatal Error");
 
+$query = "SET NAMES utf8";
+$result = $conn->query($query);
+if (!$result) die ('<br> Ошибка при установке кодировки');
+
 $subjects = array(		# в масссиве предметы(предмет, оценка), которые на повторяются в разных семестрах
 		array('name' => "Теоретические основы информатики",
 			  'mark' => 1,
