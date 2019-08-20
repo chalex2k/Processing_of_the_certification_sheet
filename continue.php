@@ -5,7 +5,9 @@
   {
 	$forename = $_SESSION['username'];
 
-    echo "Welcome back $forename.<br>";
+    //echo "Welcome back $forename.<br>";
+
+    header('Location: index.php');
           
   }
   else 
