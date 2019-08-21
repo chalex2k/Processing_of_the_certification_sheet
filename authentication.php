@@ -1,9 +1,12 @@
 <?php 
   require_once 'login.php';
   require_once 'encrypt.php';
+  require_once 'functions.php';
   $connection = new mysqli($hostname, $username, $password, $database);
 
   if ($connection->connect_error) die("Fatal Error");
+
+  query_mysql($connection, "SET NAMES utf8");
 
   $email = $password = '';
   
@@ -19,13 +22,16 @@
     if (!$result) die("User not found");
     elseif ($result->num_rows)
     {
-      $row = $result->fetch_array(MYSQLI_NUM);
+      $row = $result->fetch_array(MYSQLI_ASSOC);
 
-      $result->close();
-      if (new_token($password_temp) == $row[2])#(password_verify($password_temp, $row[1]))
+      //$result->close();
+      if (new_token($password_temp) == $row['password'])#(password_verify($password_temp, $row[1]))
       {
         session_start();
         $_SESSION["username"] = $email_temp;
+        $_SESSION['role'] = $row['role'];
+        $_SESSION['surname'] = $row['surname'];
+        $_SESSION['name'] = $row['name'];
 		#echo ("<br> $_SESSION['username']");
         die ("<p><a href='continue.php'>Click here to continue</a></p>");
       }
