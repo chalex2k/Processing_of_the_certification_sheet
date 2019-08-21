@@ -1,12 +1,11 @@
 <?php
-	session_start();
-
+	$title = "Рейтинг";
+	require_once 'head.php';
 	$subject = $group = '';
 
 	if (isset($_SESSION['username']))
 	{
 		$username = $_SESSION['username'];
-		echo "<h2>Здесь $username</h2>";
 		$email = $_SESSION['username'];
 		require_once 'login.php';
 		require_once 'functions.php';
@@ -99,7 +98,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Учебная ведомость</title>
+
 </head>
 <body>
 	<a href="index.php">На главную</a>
