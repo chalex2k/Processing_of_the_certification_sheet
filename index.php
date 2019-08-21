@@ -3,7 +3,7 @@
 <head>
 <?php 
 	$title = "Главная страница";
-	require_once 'header.php';
+	require_once 'head.php';
 ?>
 </head>
 <body>
