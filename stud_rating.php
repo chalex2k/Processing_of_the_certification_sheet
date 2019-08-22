@@ -1,14 +1,15 @@
 <?php
 	$title = "Рейтинг";
-	require_once 'head.php';
+	require_once 'head.php';	
+	require_once 'login.php';
+	require_once 'functions.php';
+	require_once 'stud_functions.php';
+
 	$subject = $group = '';
 
 	if (isset($_SESSION['username']))
-	{
-		$username = $_SESSION['username'];
-		$email = $_SESSION['username'];
-		require_once 'login.php';
-		require_once 'functions.php';
+	{		
+		$email = $_SESSION['username'];		
 
 		$connection = new mysqli($hostname, $username, $password, $database);
 		if ($connection->connect_error) die($connection->connect_error);
@@ -19,9 +20,7 @@
 		if ($user['role'] == 'student')
 		{
 			$student = get_student($connection, $user['id']);			
-			$semester = $student['semester'];
-			echo "<h2>Семестр: " . $semester . "</h2>";
-			echo "<h2>Группа: " . $student['_group'] . "</h2>";			
+			$semester = $student['semester'];		
 		}
 		else
 		{
@@ -29,27 +28,7 @@
 		}
 	}
 	else echo "Пожалуйста, <a href='continue.php'>войдите</a> в систему.";
-
-
-	function get_student($connection, $user_id)
-	{
-		$result = query_mysql($connection, "SELECT * FROM student WHERE id = '$user_id'");
-		if ($result->num_rows)
-			return $result->fetch_assoc();
-		else
-			die ("Такого студента нет");
-	}
-
-	function get_user($connection, $email)
-	{
-		$result = query_mysql($connection, "SELECT * FROM user WHERE email = '$email'");
-		if ($result->num_rows)
-		{
-			return $result->fetch_assoc();
-		}
-		else
-			die ("Пользователь с таким e-mail не найден");
-	}
+	
 
 	function print_table($connection, $query)
 	{
