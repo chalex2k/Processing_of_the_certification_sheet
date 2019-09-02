@@ -9,8 +9,8 @@
   
   if (isset($_POST['email']) && isset($_POST['password']))
   {
-	echo($_POST['email']);
-	echo($_POST['password']);
+	echo($_POST['email']."<br>");
+	echo($_POST['password']."<br>");
     $email_temp = mysql_entities_fix_string($connection, $_POST['email']);
     $password_temp = mysql_entities_fix_string($connection, $_POST['password']);
     $query   = "SELECT * FROM user WHERE email='$email_temp'";
@@ -19,19 +19,21 @@
     if (!$result) die("User not found");
     elseif ($result->num_rows)
     {
-      $row = $result->fetch_array(MYSQLI_NUM);
+      $row = $result->fetch_array(MYSQLI_ASSOC);
 
       $result->close();
-      if (new_token($password_temp) == $row[2])#(password_verify($password_temp, $row[1]))
+	  echo (new_token($password_temp)."<br>");
+	  echo ($row['surname']."<br>");
+      if (new_token($password_temp) == $row['password'])#(password_verify($password_temp, $row[1]))
       {
         session_start();
-        $_SESSION["username"] = $email_temp;
+        $_SESSION["user_email"] = $email_temp;
 		#echo ("<br> $_SESSION['username']");
         die ("<p><a href='continue.php'>Click here to continue</a></p>");
       }
-      else die("Invalid username/password combination");
+      else die("Invalid username/password combination<br>");
     }
-    else die("Invalid username/password combination a lot");
+    else die("Invalid username/password combination a lot<br>");
   }
   else
   {
