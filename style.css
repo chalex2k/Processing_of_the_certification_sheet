@@ -1,0 +1,23 @@
+.navigation {
+	display: flex;
+	width: 100%; 
+	background: #9ba5b3; 
+	padding: 5px;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
+}
+
+.lect-subjects{
+	display: flex;
+	width: 100%;
+	background: #AA7777; 
+	padding: 10px;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+}
+
+.subject{
+	padding:15px 10px;
+}
