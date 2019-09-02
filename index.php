@@ -1,33 +1,34 @@
-<?php
-session_start();
-	if (isset($_SESSION['username']))
-	{
-		$username = $_SESSION['username'];
-		echo "<h2>Здесь $username</h2>";
-		/*$who = $_SESSION['role'];
-		switch ($who)
-		{
-	  		case "guest": $redirect_url = "/lal.php"; break;
-	  		case "student": $redirect_url = "/author.html"; break;
-		  	case "lecturer": $redirect_url = "/admin.html"; break;
-		  	default: $redirect_url = "/registration.html";
-		}
-
-		header('HTTP/1.1 200 OK');
-		header('Location: http://'.$_SERVER['HTTP_HOST'].$redirect_url);
-		exit();*/
-	}
-
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Главная страница</title>
+<?php 
+	$title = "Главная страница";
+	require_once 'head.php';
+?>
 </head>
 <body>
-	<a href="continue.php">Войти</a><br>
-	<a href="stud_ved.php">Посмотреть результаты</a><br>
-	<a href="logout.php">Выйти</a>
+	<div>
+		<a href="authentication.html">Войти</a>
+	</div>
+	<div>
+		<a href="registration.php">Зарегистрироваться</a>
+	</div>	
 </body>
 </html>
+
+<?php
+
+	switch ($who)
+	{
+		case 'guest': $redirect_url = ''; break;
+		case 'student': $redirect_url = "stud_main.php"; break;
+		case 'lecturer': $redirect_url = "lect_main.php"; break;
+		default: $redirect_url = "index.php";
+	}
+
+	header('HTTP/1.1 200 OK');
+	if ($redirect_url)
+		header("Location: $redirect_url");
+	exit();
+
+?>

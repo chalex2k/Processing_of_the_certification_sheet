@@ -1,9 +1,12 @@
 <?php 
   require_once 'login.php';
   require_once 'encrypt.php';
+  require_once 'functions.php';
   $connection = new mysqli($hostname, $username, $password, $database);
 
   if ($connection->connect_error) die("Fatal Error");
+
+  query_mysql($connection, "SET NAMES utf8");
 
   $email = $password = '';
   
@@ -28,6 +31,9 @@
       {
         session_start();
         $_SESSION["user_email"] = $email_temp;
+        $_SESSION['role'] = $row['role'];
+        $_SESSION['surname'] = $row['surname'];
+        $_SESSION['name'] = $row['name'];
 		#echo ("<br> $_SESSION['username']");
         die ("<p><a href='continue.php'>Click here to continue</a></p>");
       }
