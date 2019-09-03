@@ -10,16 +10,30 @@
 		$loggedin = TRUE;
 
 		$who = $_SESSION['role'];
-		$username = $_SESSION['username'];
+		$user_email = $_SESSION['user_email'];
 		$surname = $_SESSION['surname'];
 		$name = $_SESSION['name'];
-
+		
 		$userstr = " | $surname $name";
 	}
 	else
 		$loggedin = FALSE;
+	
+	require_once 'login.php';
+	$connection = new mysqli($hostname, $username, $password, $database);
+	if ($connection->connect_error) die("Fatal Error: $connection->connect_error"); // ссылка на страницу с ошибкой и завершение
+	query_mysql($connection, "SET NAMES utf8");
 
-	echo "<title>$title$userstr</title>";
+echo <<<_INIT
+<!DOCTYPE html> 
+<html>
+  <head>
+	<title> $title$userstr </title>	
+//    <meta charset='utf-8'>
+//    <meta name='viewport' content='width=device-width, initial-scale=1'> 
+    <link rel='stylesheet' href='style.css' type='text/css'>
+	</head>
+_INIT;
 
 ?>
 
