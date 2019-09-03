@@ -17,12 +17,16 @@
 		if ($user['role'] == 'student')
 		{
 			$student = get_student($connection, $user['id']);			
-			$semester = $student['semester'];	
+			$semester = $student['semester'];
+			$stud_id = $student['id'];	
 
 
-			$query = "SELECT * FROM subject_semester JOIN subject ON subject_semester.subject_id = subject.id WHERE subject_semester.semester = $semester";
+			foreach ($_POST as $subj_id => $mark) {				
+				set_expected_mark($connection, $stud_id, $subj_id);
+			}
+			get_expected_marks($connection, $stud_id, $semester);			
+			print_table($connection, $stud_id, $semester);
 
-			editable_table($connection, $query);
 
 		}
 		else
@@ -37,38 +41,55 @@
 
 	function get_expected_marks($connection, $student_id, $semester)
 	{
-		//проработать для рейтинговой таблицы
-		/*$query = "SELECT subject.name as 'Предмет',  att_1.mark as 'Аттестация 1', att_2.mark as 'Аттестация 2', att_3.mark as 'Аттестация 3'
-				FROM subject_semester 
-				JOIN subject ON subject_semester.subject_id = subject.id
-				JOIN mark att_1
-				JOIN mark att_2
-				JOIN mark att_3 ON att_1.subject_id = subject_semester.subject_id
-				WHERE att_1.attestation_number = '1' AND att_2.attestation_number = '2' AND att_3.attestation_number = '3' AND subject_semester.semester = '1' AND att_1.student_id = '4'";*/
-		$query = "SELECT subject.name as 'Предмет', expected_mark.mark as 'Ожидаемый балл'
+		$query = "SELECT subject.id, subject.name as 'Предмет', expected_mark.mark as 'Ожидаемый балл'
 					FROM subject_semester 
 					JOIN subject ON subject_semester.subject_id = subject.id
 					JOIN expected_mark ON expected_mark.subject_id = subject_semester.subject_id
 					WHERE subject_semester.semester = $semester AND expected_mark.student_id = $student_id";
-		return $query;
+		$result = query_mysql($connection, $query);
+		$expected_marks = [];
+		while ($row = $result->fetch_assoc())
+		{
+			$expected_marks[$row['id']] = $row['Ожидаемый балл'];
+		}
+
+		return $expected_marks;
 	}
 
-	function editable_table($connection, $query)
+	function print_table($connection, $stud_id, $semester)
 	{
+		$query = "SELECT * FROM subject_semester JOIN subject ON subject_semester.subject_id = subject.id WHERE subject_semester.semester = $semester";
 		$result = query_mysql($connection, $query);
-
+		$expected_marks = get_expected_marks($connection, $stud_id, $semester);
+			echo "<form action='stud_purposes.php' method='post'>";
 			echo '<table border="1">';
 
 			while ($subject = $result->fetch_assoc())
 			{
-				echo '<tr><td>' . $subject['name'] . '</td><td><input type="text"></td></tr>';
+				echo "<tr><td>" . $subject['name'] . "</td><td><input type='text' name='" . $subject['id'] . "' value='" . $expected_marks[$subject['id']] . "'></td></tr>";
 			}
 
 			echo '</table>';
+			echo "<input type='submit' value='Сохранить''>";
+			echo "</form>";
 	}
 
-	function insert_data($connection, $query)
+	function set_expected_mark($connection, $stud_id, $subj_id)
 	{
-		
+		if (isset($_POST[$subj_id]))
+		{
+			$check_query = "SELECT * FROM expected_mark WHERE student_id = '$stud_id' AND subject_id = '$subj_id'";
+			$result = query_mysql($connection, $check_query);
+			if ($result->num_rows)
+			{
+				$query = "UPDATE expected_mark SET mark = '$_POST[$subj_id]' WHERE student_id = '$stud_id' AND subject_id = '$subj_id'";
+				$result = query_mysql($connection, $query);
+			}
+			else
+			{
+				$query = "INSERT INTO expected_mark VALUES(NULL, '$stud_id', '$subj_id', '$_POST[$subj_id]')";
+				$result = query_mysql($connection, $query);
+			}
+		}
 	}
 ?>
