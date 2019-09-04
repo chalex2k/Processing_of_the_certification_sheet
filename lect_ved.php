@@ -1,14 +1,14 @@
 <?php      					// !!! сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет. 
 session_start();				// !!! если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
-if (isset($_SESSION['username'])) // если установлена сессия
+if (isset($_SESSION['user_email'])) // если установлена сессия
 {
-	$useremail = $_SESSION['username'];
+	$user_email = $_SESSION['user_email'];
 	require_once 'login.php';
 	$connection = new mysqli($hostname, $username, $password, $database);
 	if ($connection->connect_error) die("Fatal Error");
 	
-	echo "$useremail <br>";
-	$query   = "SELECT * FROM user WHERE email = '$useremail'" ;
+	echo "$user_email <br>";
+	$query   = "SELECT * FROM user WHERE email = '$user_email'" ;
     $result  = $connection->query($query);
     if (!$result) die("User not found");
     
@@ -44,7 +44,7 @@ if (isset($_SESSION['username'])) // если установлена сесси�
 				</select>
 			");
 		
-			$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$useremail'";
+			$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$user_email'";
 			$result = $connection->query($query);
 			if (!$result) die ("Database access failed");
 
