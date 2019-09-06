@@ -1,37 +1,101 @@
-<?php      					 
-session_start();				
-if (isset($_SESSION['username'])) // если установлена сессия
+<?php      			// беда с кавычками
+require_once 'header_lect.php';  // при пустой странице писать выберете группу
+require_once 'show_error_message.php';
+echo "<main>
+	<div class = 'lect-rating'>";
+show_form($user_email);
+if (isset($_POST['ok'])) 
 {
-	$useremail = $_SESSION['username'];
-	require_once 'login.php';
-	$connection = new mysqli($hostname, $username, $password, $database);
-	if ($connection->connect_error) die("Fatal Error");
-	
-	echo "$useremail <br>";
-	$query   = "SELECT * FROM user WHERE email = '$useremail'" ;
-    $result  = $connection->query($query);
-    if (!$result) die("User not found");
-    
-	elseif ($result->num_rows)  // если нашли юзера с таким имейлом
-    {
-		$users_count = $result->num_rows;
-		$user = $result->fetch_array(MYSQLI_NUM);
+	$rating = get_rating($_POST['group'], $_POST['semester'], $_POST['subject']);
+	if ($_POST['mode'] == 'alf')
+		ksort($rating);
+	else 
+		arsort($rating);
+	show_table_students($rating, $_POST['group'], get_subject( $_POST['subject']));
+}
+echo "</div></main></body> </html>	";
+			
+function show_table_students($rating, $group, $subject)
+{
+	echo " <div class='lect-rating-item'>
+	$subject. Группа $group <br>
+	<table>";
+	echo '<tr> <td>Студент</td>
+				<td>Средний балл</td>
+						</tr>';
+	foreach ($rating as $initials => $middle_mark)
+	{
+		echo ("<tr> <td> <span class = '" . get_class_color($middle_mark) . "'>" . $initials . ' ' . ' </span> </td>
+			<td>' . $middle_mark . '</td>
+			</tr>');
+	}				
+	echo '</table>';
+	$total_middle_mark = culc_middle_value($rating);
+	echo ("Среднеий балл по группе " . $total_middle_mark);
+	echo '</div>';
+}
 
-		$result->close();
-		if ($user[5] == 'lecturer')
-		{		
-			echo '<form method="POST" action="lect_rating.php">';
-			echo("<br> Семестр  ");
-			echo ("<select name = 'semester' size = '1' >
-			<option value = '1'> 1 </option>
-			<option value = '2'> 2 </option>
-			<option value = '3'> 3 </option>
-			<option value = '4'> 4 </option>
-			<option value = '5'> 5 </option>
-				</select>
-			");
-			echo("<br> Группа  ");
-			echo ("<select name = 'group' size = '1' >
+function get_class_color($mark)
+{
+	if ($mark < 25)
+		return 'mark2';
+	elseif ($mark < 35)
+		return 'mark3';
+	elseif ($mark < 45)
+		return 'mark4';
+	else 
+		return "mark5";
+}
+
+function get_rating($group, $semester, $subject_id)
+{
+	global $connection;	
+	$query = " SELECT user.surname, user.name, AVG(mark.mark) average 
+				   FROM (SELECT email, surname, name 
+							FROM user 
+							WHERE user.email IN 
+								(SELECT id 
+									FROM student 
+									WHERE semester = $semester AND _group = $group)) AS user 
+					LEFT OUTER JOIN 
+					(SELECT * 
+						FROM mark 
+						WHERE mark.subject_id = $subject_id) AS mark 
+					ON user.email = mark.student_id
+				    GROUP BY user.surname, user.name, user.email";
+	$result = $connection -> query($query);
+	if (! $result) show_error_message();
+	$result -> data_seek(0);
+	$rating = array();
+	while ($row = $result -> fetch_array(MYSQLI_ASSOC))
+	{
+		$rating[$row['surname'] . '. ' . substr($row['name'], 0, 2) . '.'] = $row['average'];
+	}	
+	return $rating;
+}
+
+function show_form($user_email)
+{
+	echo <<<_GRSEM
+	<div class='lect-rating-item'>
+	<div class='rating-form'>
+		<form method="POST" action="lect_rating.php">
+		<div class = 'rating-form-item'>
+			Семестр <br>
+			<select name = 'semester' size = '1'>
+				<option value = '1'> 1 </option>
+				<option value = '2'> 2 </option>
+				<option selected value = '3'> 3 </option>
+				<option value = '4'> 4 </option>
+				<option value = '5'> 5 </option>
+				<option value = '6'> 6 </option>
+				<option value = '7'> 7 </option>
+				<option value = '8'> 8 </option>
+			</select>
+		</div>
+		<div class = 'rating-form-item'>
+		Группа <br>
+		<select name = 'group' size = '1' >
 			<option value = '1'> 1 </option>
 			<option value = '2'> 2 </option>
 			<option value = '3'> 3 </option>
@@ -41,142 +105,68 @@ if (isset($_SESSION['username'])) // если установлена сесси�
 			<option value = '7'> 7 </option>
 			<option value = '8'> 8 </option>
 			<option value = '9'> 9 </option>
-				</select>
-			");
+		</select>
+		</div>
+_GRSEM;
 		
-			$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$useremail'";
-			$result = $connection->query($query);
-			if (!$result) die ("Database access failed");
-
-			$rows = $result->num_rows;
-			echo("<br> Предмет ");
-			echo ("<select name = 'subject' size = '1' >");
-			//echo($rows);
-			for ($j = 0 ; $j < $rows ; ++$j)
-			{
-				$result->data_seek($j);
-				$lect_subj = $result->fetch_array(MYSQLI_NUM);
-				
-				$query2 = " SELECT name FROM subject WHERE id = $lect_subj[1]";
-				$result2 = $connection->query($query2);
-				if (!$result2) die ("Database access failed  2");
-				
-				$name_subj = $result2->fetch_array(MYSQLI_NUM);
-				echo "<option value = ".$lect_subj[1].">"."$name_subj[0]"." </option>";
-			}
-			echo "</select>";
-			echo 'по алфавиту <input type = "radio" name = "mode" value = "1"> ';
-			echo 'по среднему баллу <input type = "radio" name = "mode" value = "2" checked = "checked"> ';
-			echo '<br> <input type="submit" name="find" value="find">';
-			
-			echo '</form>';
-			
-			if (isset($_POST['find'])) 
-			{
-				$gr =  $_POST['group'] ;
-				$se = $_POST['semester'];
-				$sb = $_POST['subject'];
-
-				$ved = get_list($gr, $se, $sb, $connection);
-				$rating = get_rating($ved, $connection);
-				if ($_POST['mode'] == '2')
-				{ arsort($rating);}
-				else {ksort($rating);}
-				$total_middle_mark = culc_middle_value($rating);
-				//echo ("count of items in ved ".count($ved));
-				
-				print_form_students_marks($rating);
-				echo ("Среднеий балл по группе ".$total_middle_mark);
-			}
-	   
-			
-			
-		}
-	}
-}
-else 
-	echo "Please <a href=authentication.html>click here</a> to log in.";
-
-
-function print_form_students_marks($rating)
-{
-	echo ' <table>';
-	echo '<tr> <td>Студент</td>
-				<td>Средний балл</td>
-						</tr>';
-				foreach ($rating as $initials => $middle_mark)
-				{
-						echo '<tr> <td>'.$initials.' '.'</td>
-						<td>'.$middle_mark.'</td>
-						</tr>';
-				}				
-				echo '
-       <tr><td>
-	   
-	   </td></tr>
-       </table>';
-}
-
-function get_list($group, $semester, $subject_id, $connection)
-{
-	$query3  = "SELECT id FROM student WHERE semester = $semester AND _group = $group ";
-	$result3 = $connection->query($query3);
-	if (!$result3) die ("Database access failed 3");
-	$rows3 = $result3->num_rows;
-	//echo "count of students ".$rows3;
-	$ved = array();
-	for ($j = 0 ; $j < $rows3 ; ++$j)
+	$subjects = get_users_subjects($user_email);
+	echo ("<div class = 'rating-form-item'>
+	Предмет <br>
+	<select name = 'subject' size = '1' >");
+	foreach ($subjects as $key => $value)
 	{
-		$result3->data_seek($j);
-		$stud_id = $result3->fetch_array(MYSQLI_NUM);
-	
-		//echo "<br> stud_id[0] - student_id  ".$stud_id[0];
-		$ved[$stud_id[0]] = array();
-		$query4 = " SELECT * FROM mark WHERE subject_id = $subject_id AND student_id = '$stud_id[0]'";
-		$result4 = $connection->query($query4);
-		if (!$result4) die ("Database access failed  4");
-		$rows4 = $result4->num_rows;
-		//echo " marks count". $rows4;
-		
-		for ($k = 0 ; $k < $rows4 ; ++$k)
-		{
-			$result4->data_seek($k);
-			$marks = $result4->fetch_array(MYSQLI_NUM);
-			$ved[$stud_id[0]][$marks[4]] = $marks[3];
-		}	
+		echo "<option value = ".$key.">"."$value"." </option>";
 	}
-	return $ved;
+	echo "</select> </div>";
+	echo '<div class = "rating-form-item"> по алфавиту <input type = "radio" name = "mode" value = "alf" checked = "checked"> ';
+	echo 'по среднему баллу <input type = "radio" name = "mode" value = "mark" > </div> ';
+	echo '<div class = "rating-form-item"> <input type="submit" name="ok" value="Ok"> </div>';
+	echo '</form>
+	</div></div>';
 }
 
-function get_rating($ved, $connection)
+function get_users_subjects($user_email)
 {
-	$rating = array();
-	foreach ($ved as $user_email => $marks)
+	global $connection;
+	$subjects = array();
+	$query = "SELECT id, name, mark 
+				FROM subject 
+				WHERE id IN
+					(SELECT subject_id 
+						FROM lecturer_subject 
+						WHERE lecturer_id = '$user_email')
+				ORDER BY name";
+	$result = $connection->query($query);
+	if (! $result) show_error_message();
+	$result -> data_seek(0);
+	while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 	{
-		$query   = "SELECT * FROM user WHERE email = '$user_email'" ;
-		$result  = $connection->query($query);
-		if (!$result) die("User not found");
-		elseif ($result->num_rows)  // если нашли юзера с таким имейлом
-		{
-			$users_count = $result->num_rows;
-			$user = $result->fetch_array(MYSQLI_NUM);
-			$result->close();
-			$initials = "$user[2]".". ".substr("$user[3]", 0, 2).'.';
-			$rating["$initials"] = culc_middle_value($marks);
-		}
+		$append = ($row['mark'] == 1) ? " (оценка)" : " (зачёт)";
+		$subjects[$row['id']] = $row['name'] . $append;
 	}
-	return $rating;
+	return $subjects;
 }
-
 
 function culc_middle_value($arr)
-{
-	$sum = 0;
+{ // деление на ноль
+	$count = 0;
 	foreach ($arr as $value)
-	{
-		$sum += $value;
-	}
-	return $sum / count($arr);
+		if (! empty($value))
+			$count++;
+	return array_sum($arr) / $count;
+}
+
+function get_subject($subject_id)
+{
+	global $connection;
+	$query = "SELECT name 
+				FROM subject 
+				WHERE id = $subject_id;";
+	$result = $connection->query($query);
+	if (! $result) show_error_message();
+	$result -> data_seek(0);
+	$row = $result -> fetch_array(MYSQLI_ASSOC);
+	return $row['name'];
 }
  ?>
 
