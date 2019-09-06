@@ -35,7 +35,9 @@
         $_SESSION['surname'] = $row['surname'];
         $_SESSION['name'] = $row['name'];
 		#echo ("<br> $_SESSION['username']");
-        die ("<p><a href='continue.php'>Click here to continue</a></p>");
+		header("Location: index.php");
+		
+        //die ("<p><a href='continue.php'>Click here to continue</a></p>");
       }
       else die("Invalid username/password combination<br>");
     }
