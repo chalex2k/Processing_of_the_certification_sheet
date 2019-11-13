@@ -54,7 +54,7 @@
 	function get_rating($group, $semester, $subject_id)
 	{
 		global $connection;	
-		$query = " SELECT user.surname, user.name, AVG(mark.mark) average 
+		$query = " SELECT user.surname, user.name, ROUND(AVG(mark.mark),2) average 
 					FROM (SELECT email, surname, name 
 								FROM user 
 								WHERE user.email IN 
@@ -73,7 +73,7 @@
 		$rating = array();
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
-			$rating[$row['surname'] . '. ' . substr($row['name'], 0, 2) . '.'] = $row['average'];
+			$rating[$row['surname'] . '. ' . substr($row['name'], 0, 2) . '.'] = $row['average'] != '' ? (double)$row['average'] : $row['average'];
 		}	
 		return $rating;
 	}
