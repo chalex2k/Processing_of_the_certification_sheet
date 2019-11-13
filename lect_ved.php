@@ -1,37 +1,89 @@
-<?php      					// !!! сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет. 
-session_start();				// !!! если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
-if (isset($_SESSION['user_email'])) // если установлена сессия
-{
-	$user_email = $_SESSION['user_email'];
-	require_once 'login.php';
-	$connection = new mysqli($hostname, $username, $password, $database);
-	if ($connection->connect_error) die("Fatal Error");
-	
-	echo "$user_email <br>";
-	$query   = "SELECT * FROM user WHERE email = '$user_email'" ;
-    $result  = $connection->query($query);
-    if (!$result) die("User not found");
-    
-	elseif ($result->num_rows)  // если нашли юзера с таким имейлом
-    {
-		$users_count = $result->num_rows;
-		$user = $result->fetch_array(MYSQLI_NUM);
+<?php      					// !!! сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет.  Проверка оценок которые пришли от пользователя
+			// !!! если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
+require_once 'header_lect.php';  
+require_once 'show_error_message.php';
+echo "<main>
+	<div class = 'lect-ved'>";
+show_form($user_email);
 
-		$result->close();
-		if ($user[5] == 'lecturer')
-		{		
-			echo '<form method="POST" action="lect_ved.php">';
-			echo("<br> Семестр  ");
-			echo ("<select name = 'semester' size = '1' >
-			<option value = '1'> 1 </option>
-			<option value = '2'> 2 </option>
-			<option value = '3'> 3 </option>
-			<option value = '4'> 4 </option>
-			<option value = '5'> 5 </option>
-				</select>
-			");
-			echo("<br> Группа  ");
-			echo ("<select name = 'group' size = '1' >
+if (isset($_POST['ok'])) 
+{
+	$group =  $_POST['group'];
+	$semester = $_POST['semester'];
+	$subject = $_POST['subject'];
+	setcookie('group', $group);
+	setcookie('semester', $semester);
+	setcookie('subject_id', $subject);
+	$list = get_list($group, $semester, $subject);
+	//var_dump($list);
+	print_list($list);
+}		
+if (isset($_POST['send']))
+{	
+	if(isset($_FILES) && $_FILES['user_file']['error'] == 0)
+	{ // Проверяем, загрузил ли пользователь файл
+		$destiation_dir = dirname(__FILE__) .'/' . $_FILES['user_file']['name']; // Директория для размещения файла
+		move_uploaded_file($_FILES['user_file']['tmp_name'], $destiation_dir ); // Перемещаем файл в желаемую директорию
+		//echo 'File Uploaded';  // Оповещаем пользователя об успешной загрузке файла
+		$arr = read_exel_file($_FILES['user_file']['name']);
+		// echo("<br>". $_FILES['user_file']['name']);
+		$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id']);	
+		update_list_from_file($arr, $list);
+		set_new_marks($list);
+		echo "Уведомление: оценки установлены";
+		unlink($destiation_dir);
+		print_list($list);
+	}
+}
+if (isset($_POST['save']))
+{	
+	$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);
+	get_new_marks($list);
+	if (update_DB($list))
+		echo "Уведомление: Данные сохранены.";
+	else
+		echo "Уведомление: Произошла ошибка. Данные не сохранены.";
+	set_new_marks($list);
+	print_list($list);	
+}
+echo "</div></main></body> </html>";
+
+function get_new_marks($list)
+{
+	$attestations[1] = "att1";
+	$attestations[2] = "att2";
+	$attestations[3] = "att3";
+	for ($i = 1; $i <= 3; ++$i)
+		for ($j = 0; $j < count($list); $j++)
+		{
+			$mark = $_POST["$attestations[$i]"][$j];
+			if ( trim($mark) == '' or (int)$mark >= 0 and (int)$mark <= 50)
+				$list[$j][$i] -> new_value = $mark;
+		}
+}
+
+function show_form($user_email)
+{
+	echo <<<_GRSEM
+	<div class='lect-ved-item'>
+	<div class='ved-form'>
+		<form method="POST" action="lect_ved.php">
+		<div class = 'ved-form-item'>
+			Семестр <br>
+			<select name = 'semester' size = '1'>
+				<option value = '1'> 1 </option>
+				<option value = '2'> 2 </option>
+				<option selected value = '3'> 3 </option>
+				<option value = '4'> 4 </option>
+				<option value = '5'> 5 </option>
+				<option value = '6'> 6 </option>
+				<option value = '7'> 7 </option>
+				<option value = '8'> 8 </option>
+			</select>
+		</div>
+		<div class = 'ved-form-item'>
+		Группа <br>
+		<select name = 'group' size = '1' >
 			<option value = '1'> 1 </option>
 			<option value = '2'> 2 </option>
 			<option value = '3'> 3 </option>
@@ -41,235 +93,181 @@ if (isset($_SESSION['user_email'])) // если установлена сесс�
 			<option value = '7'> 7 </option>
 			<option value = '8'> 8 </option>
 			<option value = '9'> 9 </option>
-				</select>
-			");
+		</select>
+		</div>
+_GRSEM;
 		
-			$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$user_email'";
-			$result = $connection->query($query);
-			if (!$result) die ("Database access failed");
-
-			$rows = $result->num_rows;
-			echo("<br> Предмет ");
-			echo ("<select name = 'subject' size = '1' >");
-			//echo($rows);
-			for ($j = 0 ; $j < $rows ; ++$j)
-			{
-				$result->data_seek($j);
-				$lect_subj = $result->fetch_array(MYSQLI_NUM);
-				
-				$query2 = " SELECT name FROM subject WHERE id = $lect_subj[1]";
-				$result2 = $connection->query($query2);
-				if (!$result2) die ("Database access failed  2");
-				
-				$name_subj = $result2->fetch_array(MYSQLI_NUM);
-				echo "<option value = ".$lect_subj[1].">"."$name_subj[0]"." </option>";
-			}
-			echo "</select>";
-			echo '<br> <input type="submit" name="find" value="find">';
-			echo '</form>';
-			
-			
-
-			if (isset($_POST['send']))
-			{	
-				if(isset($_FILES) && $_FILES['userfile']['error'] == 0){ // Проверяем, загрузил ли пользователь файл
-				$destiation_dir = dirname(__FILE__) .'/'.$_FILES['userfile']['name']; // Директория для размещения файла
-				move_uploaded_file($_FILES['userfile']['tmp_name'], $destiation_dir ); // Перемещаем файл в желаемую директорию
-				echo 'File Uploaded';  // Оповещаем пользователя об успешной загрузке файла
-				$arr = readExelFile($_FILES['userfile']['name']);
-				echo("<br>". $_FILES['userfile']['name']);
-				
-				if(isset($_COOKIE['group']) and isset($_COOKIE['semester']) and isset($_COOKIE['subject_id']))
-				{
-					$ved = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);	
-					update_ved_from_file($arr, $ved);
-					setNewMarks($ved);
-					print_form_students_marks($ved);
-				}
-				
-				
-				
-				// удалить файл после
-			}}
-			if (isset($_POST['find'])) 
-			{
-				$gr =  $_POST['group'] ;
-				setcookie('group', $gr);
-				$se = $_POST['semester'];
-				setcookie('semester', $se);
-				$sb = $_POST['subject'];
-				setcookie('subject_id', $sb);
-
-				$ved = get_list($gr, $se, $sb, $connection);
-				
-				//echo ("count of items in ved ".count($ved));
-				
-				print_form_students_marks($ved);
-			}
-	   
-			if (isset($_POST['save']))
-			{	
-				$ved = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);	
-				//echo ("count of items in ved".count($ved));
-				echo "<br>";
-				$attestations[1] = "att1";
-				$attestations[2] = "att2";
-				$attestations[3] = "att3";
-				for ($i = 1; $i <= 3; ++$i)
-				{	
-			
-					for ($j = 0; $j < count($ved); $j++)
-					{
-					$ved[$j][$i]->new_value = $_POST["$attestations[$i]"][$j];
-					}
-				}
-				updateDB($ved, $connection);
-				setNewMarks($ved);
-				print_form_students_marks($ved);	// cooooool!!! it is works!!!!			
-			}
-			
-		}
-	}
+	$subjects = get_users_subjects($user_email);
+	echo ("<div class = 'ved-form-item'>
+	Предмет <br>
+	<select name = 'subject' size = '1' >");
+	foreach ($subjects as $key => $value)
+		echo "<option value = ".$key.">"."$value"." </option>";
+	echo "</select> </div>";
+	echo '<div class = "ved-form-item"> <input type="submit" name="ok" value="Ok"> </div>';
+	echo '</form>
+	</div></div>';
 }
-else 
-	echo "Please <a href=authentication.html>click here</a> to log in.";
 
-
-function print_form_students_marks($ved)
+function get_users_subjects($user_email)
 {
-	echo '<form method="POST" action="lect_ved.php"> <table>';
-				foreach ($ved as $num_rows => $row)
-				{
-						echo '<tr> <td><input type="text" name="list[]" value = '.$row[0]->initials.'></td>
-						<td><input type="text" name="att1[]" value="'.$row[1]->value.'"></td>
-						<td><input type="text" name="att2[]" value="'.$row[2]->value.'"></td>
-						<td><input type="text" name="att3[]" value="'.$row[3]->value.'"></td>
-						</tr>';
-				}				
-				echo '
-       <tr><td>
+	global $connection;
+	$subjects = array();
+	$query = "SELECT id, name, mark 
+				FROM subject 
+				WHERE id IN
+					(SELECT subject_id 
+						FROM lecturer_subject 
+						WHERE lecturer_id = '$user_email')
+				ORDER BY name";
+	$result = $connection->query($query);
+	if (! $result) show_error_message();
+	$result -> data_seek(0);
+	while ($row = $result -> fetch_array(MYSQLI_ASSOC))
+	{
+		$append = ($row['mark'] == 1) ? " (оценка)" : " (зачёт)";
+		$subjects[$row['id']] = $row['name'] . $append;
+	}
+	return $subjects;
+}
+
+function print_list($list)
+{
+	echo " <div class='lect-ved-item'>
+		   <div class='ved-list>
+			<div class='ved-list-item>";
+	echo '<form method="POST" action="lect_ved.php">
+		<table>';
+	foreach ($list as $row) // если не все оценки стоят?
+	{
+		echo '<tr> <td><input type="text" name="list[]" value = "' . $row[0] -> initials . '"></td>
+				   <td><input type="text" name="att1[]" value="' . $row[1] -> value . '"></td>
+				   <td><input type="text" name="att2[]" value="' . $row[2] -> value . '"></td>
+				   <td><input type="text" name="att3[]" value="' . $row[3] -> value.'"></td>
+	</tr>';		}	
+	echo '
+	</table>
+       <br>
 	   <input type="submit" name="save" value="save" />
-	   <input type="submit" name="load" value="load" />
-	   </td></tr>
-       </table>
-	   </form>';
+       
+	   </form>
+	   </div>';
+
+		echo ("<div class='ved-list-item'>");
 	echo ('<!-- Тип кодирования данных, enctype, ДОЛЖЕН БЫТЬ указан ИМЕННО так -->
 <form enctype="multipart/form-data" action="lect_ved.php" method="POST">
     <!-- Поле MAX_FILE_SIZE должно быть указано до поля загрузки файла -->
     <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
     <!-- Название элемента input определяет имя в массиве $_FILES -->
-    Отправить этот файл: <input name="userfile" type="file" />
+    Отправить этот файл: <input name="user_file" type="file" />
     <input type="submit" name = "send" value="Отправить файл" />
 </form>');
+
+	echo "</div>";
+	echo "</div></div>";
 }
 
-function get_list($group, $semester, $subject_id, $connection)
+function get_list($group, $semester, $subject_id)
 {
-	$query3  = "SELECT id FROM student WHERE semester = $semester AND _group = $group ";
-	$result3 = $connection->query($query3);
-	if (!$result3) die ("Database access failed 3");
-	$rows3 = $result3->num_rows;
-	//echo "count of students ".$rows3;
-	$ved = array();
-	for ($j = 0 ; $j < $rows3 ; ++$j)
+	global $connection;
+	$query = "SELECT email, surname, name 
+				FROM user 
+				WHERE user.email IN 
+					(SELECT id 
+						FROM student 
+						WHERE semester = $semester AND _group = $group)";		
+	$result = $connection -> query($query);
+	if (! $result) show_error_message();
+	$result -> data_seek(0);
+	$list = array();
+	while ($student = $result -> fetch_array(MYSQLI_ASSOC))
 	{
-		$result3->data_seek($j);
-		$stud_id = $result3->fetch_array(MYSQLI_NUM);
-		
-		//$ved[$stud_id[0]] = array();
-		
 		$row = array();
-		$student;
-		$query5   = "SELECT * FROM user WHERE email = '$stud_id[0]'" ;
-		$result5  = $connection->query($query5);
-		if (!$result5) die("User not found");
-		if (!$result5->num_rows) die("User not found"); // если нашли юзера с таким имейлом
-		$user = $result5->fetch_array(MYSQLI_NUM);
-		$result5->close();
-		//$initials = "$user[2]".". ".substr("$user[3]", 0, 2).'.';
-		$initials = (string)$user[2];
-		$row[] = new Student($stud_id[0], $initials);
-		//$ved[$stud_id[0]]['initials'] = $initials;
-		
-		$query4 = " SELECT * FROM mark WHERE subject_id = $subject_id AND student_id = '$stud_id[0]'";
-		$result4 = $connection->query($query4);
-		if (!$result4) die ("Database access failed  4");
-		$rows4 = $result4->num_rows;
-		//echo " marks count". $rows4;
-		
-		for ($k = 0 ; $k < $rows4 ; ++$k)
-		{
-			$result4->data_seek($k);
-			$marks = $result4->fetch_array(MYSQLI_NUM);
-			$row[$marks[4]] = new Mark($marks[0], $marks[3]);
-			//$ved[$stud_id[0]][$marks[4]]['id'] = $marks[0];	
-		}	
-		$ved[] = $row;
+		$initials = $student['surname'] . '. ' . substr($student['name'], 0, 2) . '.';
+		$row[0] =  new Student($student['email'], $initials);
+		$student_id = $student['email']; 
+		$query2 = " SELECT id, mark, attestation_number 
+						FROM mark 
+						WHERE subject_id = $subject_id AND student_id = '$student_id'";
+		$result2 = $connection -> query($query2);
+		if (! $result2) show_error_message($connection -> error);
+		$result2 -> data_seek(0);
+		while ($mark = $result2 -> fetch_array(MYSQLI_ASSOC))
+			$row[$mark['attestation_number']] = new Mark($mark['id'], $mark['mark']);
+		$list[] = $row;
 	}
-	return $ved;
+	for($j=0;$j<count($list);$j++)
+		for ($i = 1; $i <= 3; $i++)
+			if (! isset($list[$j][$i]))
+				$list[$j][$i] = new Mark('', '');
+	usort($list, "cmp_rows");
+	return $list;
 }
 
-function updateDB($ved, $connection)
+function cmp_rows($row1, $row2)
 {
-	foreach($ved as $index => $row) 
-	{
+	if ($row1[0] -> initials > $row2[0] -> initials)
+		return 1;
+	elseif($row1[0] -> initials < $row2[0] -> initials)
+		return -1;
+	return 0;
+}
+
+function update_DB($list)
+{
+	global $connection;
+	foreach($list as $row) 
 		for ($i = 1; $i <=3; $i++)
-		{
-			if (isset($row[$i]->new_value) and ($row[$i]->new_value != $row[$i]->value))
+			if (isset($row[$i] -> new_value) and $row[$i] -> new_value != $row[$i] -> value)
 			{
-				if (isset($row[$i]->value))
-				{		
-					$id = $row[$i]->id;
-					$new_mark = $row[$i]->new_value;
-					$query = " UPDATE mark SET mark = $new_mark WHERE id = $id";
-					$result = $connection->query($query);
-					if (!$result) die ("Сбой при обновлении данных".$connection->error());
-					else echo "Данные успешно сохранены";	
-				}
-				else                  // сократить, одинаковый код
+				if ($row[$i] -> value == '')
 				{
-					$stud_id = $row[0]->email;
-					$new_mark = $row[$i]->new_mark;
+					$stud_id = $row[0] -> email;
+					$new_mark = $row[$i] -> new_value;
 					$subj_id = $_COOKIE['subject_id'];
-					$query = "INSERT INTO mark VALUES(NULL,'$stud_id', '$subj_id', '$new_mark', '$i')";
-					$result = $connection->query($query);
-					if (!$result) die($connection->error);
-					else echo "Данные успешно сохранены";
+					$query = "INSERT INTO mark VALUES(NULL, '$stud_id', '$subj_id', '$new_mark', '$i')";
+					$result = $connection -> query($query);
+					if (! $result) return false;
 				}
-			}
-		}
-	}
+				elseif ($row[$i] -> new_value == '')
+				{
+					$id = $row[$i] -> id;
+					$query = "DELETE FROM mark WHERE id = $id";
+					$result = $connection -> query($query);
+					if (! $result) return false;
+				}
+				else
+				{
+					$id = $row[$i] -> id;
+						$new_mark = $row[$i] -> new_value;
+						$query = "UPDATE mark SET mark = $new_mark WHERE id = $id";
+						$result = $connection -> query($query);
+						if (! $result) return false;
+				}
+			}	
+	return true;
 }
 
-function setNewMarks($ved)
+function set_new_marks($list)
 {
-	foreach($ved as $index => $row) 
-	{
-		for ($i = 1; $i <=3; $i++)
-		{
-			if (isset($row[$i]->new_value) and ($row[$i]->new_value != $row[$i]->value))
-			{
-				$row[$i]->value = $row[$i]->new_value;
-			}
-		}
-	}
+	foreach($list as $row)
+		for ($i = 1; $i <= 3; $i++)
+			if (isset($row[$i] -> new_value) and ($row[$i] -> new_value != $row[$i] -> value))
+				$row[$i] -> value = $row[$i] -> new_value;
 }
 
-function readExelFile($filepath)
+function read_exel_file($file_path)
 {
 	require_once "phpexcel/PHPExcel.php"; //подключаем наш фреймворк
-
 	$ar = array(); // инициализируем массив
-
-	$inputFileType = PHPExcel_IOFactory::identify($filepath);  // узнаем тип файла, excel может хранить файлы в разных форматах, xls, xlsx и другие
-	$objReader = PHPExcel_IOFactory::createReader($inputFileType); // создаем объект для чтения файла
-	$objPHPExcel = $objReader->load($filepath); // загружаем данные файла в объект
-	$ar = $objPHPExcel->getActiveSheet()->toArray(); // выгружаем данные из объекта в массив
-
+	$input_file_type = PHPExcel_IOFactory :: identify($file_path);  // узнаем тип файла, excel может хранить файлы в разных форматах, xls, xlsx и другие
+	$reader = PHPExcel_IOFactory :: createReader($input_file_type); // создаем объект для чтения файла
+	$obj_PHP_Excel = $reader -> load($file_path); // загружаем данные файла в объект
+	$ar = $obj_PHP_Excel -> getActiveSheet() -> toArray(); // выгружаем данные из объекта в массив
 	return $ar; //возвращаем массив
 }
 
-function update_ved_from_file($arr, $ved)
+function update_list_from_file($arr, $list)
 {
 	 $MOST_SHORT_SURNAME = 2;
 	 $MOST_LONG_SURNAME = 30;
@@ -347,16 +345,19 @@ m1:
 		echo "столбцах <br>";
 	
 	
-	foreach ($ved as $index => $row)
+	foreach ($list as $index => $row)
 	{
 		for($row_i = 0; $row_i < count($arr); $row_i++)
 		{
-			if ($arr[$row_i][$initials_index] == $row[0]->initials)
+			if ($arr[$row_i][$initials_index] == $row[0] -> initials)
 			{
-				for( $i = 0; $i <= 2; $i++){
-				if ($arr[$row_i][$marks[$i]] != "")
-					$row[$i+1]->new_value = $arr[$row_i][$marks[$i]];
-			}}
+				for( $i = 0; $i <= 2; $i++)
+				{
+					$mark = $arr[$row_i][$marks[$i]];
+					if ( trim($mark) == '' or (int)$mark >= 0 and (int)$mark <= 50)
+						$row[$i+1] -> new_value = $mark;
+				}
+			}
 		}
 	}
 }
@@ -366,10 +367,10 @@ class Student
 	public $email;
 	public $initials;
 	
-	function __construct($_email, $_initials)
+	function __construct($email, $initials)
 	{
-		$this->email = $_email;
-		$this->initials = $_initials;
+		$this -> email = $email;
+		$this -> initials = $initials;
 	}
 }
 
@@ -381,8 +382,8 @@ class Mark
 	
 	function __construct($id, $value)
 	{
-		$this->id = $id;
-		$this->value = $value;
+		$this -> id = $id;
+		$this -> value = $value;
 	}
 }
  ?>
