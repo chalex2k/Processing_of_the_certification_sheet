@@ -23,6 +23,11 @@
 		echo " <div class='lect-rating-item'>
 			$subject. Группа $group <br>
 			<table>";
+		if (count($rating) == 0)
+		{
+			echo ("Студентов не существует!");
+			return;
+		}
 		echo '<tr> <td>Студент</td>
 					<td>Средний балл</td>
 							</tr>';
@@ -33,7 +38,8 @@
 				</tr>');
 		}				
 		echo '</table>';
-		$total_middle_mark = culc_middle_value($rating);
+		delete_emty($rating);
+		$total_middle_mark = array_sum($rating) / count($rating);
 		echo ("Среднеий балл по группе " . $total_middle_mark);
 		echo '</div>';
 	}
@@ -153,14 +159,12 @@ _GRSEM;
 		return $subjects;
 	}
 
-	// Вычисляет среднее значение в массиве, пропуская пустые элементы
-	function culc_middle_value($arr)
-	{ // деление на ноль // эту функцию вообще надо убрать
-		$count = 0;
-		foreach ($arr as $value)
-			if (! empty($value))
-				$count++;
-		return array_sum($arr) / $count;
+	// Удаляет из массива пустые строки
+	function delete_emty(&$arr)
+	{
+		foreach ($arr as $key => $value)
+			if ((string)$value == '')
+				unset($arr[$key]);
 	}
 
 	// Получает название предмета по id из БД и возвращает его.
