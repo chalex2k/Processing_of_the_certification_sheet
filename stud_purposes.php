@@ -36,7 +36,7 @@
 	}
 	else 
 	{
-		echo "<div>Пожалуйста, <a href='authentication.html'>войдите</a> в систему.</div>";
+		echo "<div>Пожалуйста, <a href='authentication.php'>войдите</a> в систему.</div>";
 	}
 
 	function get_expected_marks($connection, $student_id, $semester)

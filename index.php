@@ -6,13 +6,17 @@
 	require_once 'head.php';
 ?>
 </head>
-<body>
-	<div>
-		<a href="authentication.html">Войти</a>
-	</div>
-	<div>
+<body class="main">
+    <div class="greeting">
+        <p>Приветствуем тебя, странник!</p>
+        <p>Студент ФКН? Регистрируйся и следи за процессом обучения и индивидуальными успехами.
+            Преподаватель? Здесь легко управлять заполнением ведомостей в личном кабинете.</p>
+    </div>
+	<div class="link">
+		<a href="authentication.php">Войти</a>
 		<a href="registration.php">Зарегистрироваться</a>
-	</div>	
+        <hr>
+	</div>
 </body>
 </html>
 

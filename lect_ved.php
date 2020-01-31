@@ -132,7 +132,7 @@ if (isset($_SESSION['user_email'])) // если установлена сесс�
 	}
 }
 else 
-	echo "Please <a href=authentication.html>click here</a> to log in.";
+	echo "Please <a href=authentication.php>click here</a> to log in.";
 
 
 function print_form_students_marks($ved)
