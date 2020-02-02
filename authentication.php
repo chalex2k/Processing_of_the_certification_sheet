@@ -6,7 +6,6 @@
     ?>
     <script src="js/validate_forms.js"></script>
 </head>
-<body class="auth">
 
 <?php
   require_once 'login.php';
@@ -34,8 +33,6 @@
       $row = $result->fetch_array(MYSQLI_ASSOC);
 
       $result->close();
-	  echo (new_token($password_temp)."<br>");
-	  echo ($row['surname']."<br>");
       if (new_token($password_temp) == $row['password'])#(password_verify($password_temp, $row[1]))
       {
         session_start();
@@ -71,25 +68,25 @@
   }
 ?>
 
-
-<div class="auth">
-    <form method="post" action="authentication.php" onsubmit="return validate(this)">
-        <p class="str_input">
-            <label for="email">Введите свой логин</label>
-            <input type="text" name="email" required="required" value="<?php echo $email_temp?>">
-        </p>
-        <p class="str_input">
-            <label for="password">Введите пароль</label>
-            <input type="password" name="password" required="required" value="<?php echo $password_temp ?>">
-        </p>
-        <div class="errors">
-            <?php echo $error ?>
-        </div>
-        <p class="button">
-            <button type="submit">Войти</button>
-            <a href="registration.php" class="btn">Зарегистрироваться</a>
-        </p>
-    </form>
-</div>
+<body class="auth">
+    <div class="auth">
+        <form method="post" action="authentication.php" onsubmit="return validate(this)">
+            <div class="str-input-auth">
+                <label for="email">Введите свой логин</label>
+                <input type="text" name="email" value="<?php echo $email_temp?>">
+            </div>
+            <div class="str-input-auth">
+                <label for="password">Введите пароль</label>
+                <input type="password" name="password" value="<?php echo $password_temp ?>">
+            </div>
+            <div class="errors">
+                <?php echo $error ?>
+            </div>
+            <div class="btn-auth" id="at-auth">
+                <button type="submit">Войти</button>
+                <a href="registration.php" class="to-reg">Зарегистрироваться</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

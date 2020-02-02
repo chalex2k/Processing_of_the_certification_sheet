@@ -1,7 +1,7 @@
 function validate(form) {
     fail = validateEmail(form.email.value)
     if (fail == "") return true
-    else { return false }
+    else { alert(fail); return false }
 }
 function validateEmail(field) {
     if (field == "") return "Пропущено поле"
