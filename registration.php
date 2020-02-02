@@ -1,41 +1,62 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Регистрация</title>
-</head>
-<body>
-	<form method="post" action="registration.php">
-		<input type="text" name="surname" maxlength="32" placeholder="Фамилия"><br>
-		<input type="text" name="name" maxlength="32" placeholder="Имя" autofocus="autofocus"><br>		
-		<input type="text" name="midname" maxlength="32" placeholder="Отчество"><br>
-		<input type="email" name="email" maxlength="50" placeholder="E-mail"><br>
-		<input type="text" name="password" maxlength="50" placeholder="Пароль"><br>
-		<select name="role" size="1">
-			<option selected value="lecturer">Преподаватель</option>
-			<option value="student">Студент</option>
-		</select><br>
-		<select name="semester" size="1">
-			<option selected>--Семестр--</option>
-			<option value="1">1</option>
-			<option value="2">2</option>
-			<option value="3">3</option>
-			<option value="4">4</option>
-			<option value="5">5</option>
-			<option value="6">6</option>
-			<option value="7">7</option>
-			<option value="8">8</option>
-		</select><br>
-		<select name="group" size="1">
-			<option selected>--Группа--</option>
-			<option value="1">1</option>
-			<option value="2">2</option>
-			<option value="3">3</option>
-			<option value="4">4</option>
-		</select><br>
-		<input type="submit" value="Зарегистрироваться">
-	</form>
+<?php
+    $title = "Регистрация";
+    require_once 'head.php';
+?>
+<body class="auth">
+    <div class="reg">
+        <form method="post" action="registration.php">
+            <div class="str-input-reg">
+                <label for="surname">Фамилия</label>
+                <input type="text" name="surname" maxlength="32">
+            </div>
+            <div class="str-input-reg">
+                <label for="name">Имя</label>
+                <input type="text" name="name" maxlength="32">
+            </div>
+            <div class="str-input-reg">
+                <label for="midname">Отчество</label>
+                <input type="text" name="midname" maxlength="32">
+            </div>
+            <div class="str-input-reg">
+                <label for="email">E-mail</label>
+                <input type="email" name="email" maxlength="50">
+            </div>
+            <div class="str-input-reg">
+                <label for="password">Пароль</label>
+                <input type="password" name="password" maxlength="50">
+            </div>
+            <div class="list">
+                <select name="role" size="1">
+                    <option selected>Выберите...</option>
+                    <option value="lecturer">Преподаватель</option>
+                    <option value="student">Студент</option>
+                </select>
+            </div>
+            <div class="list">
+                <select name="semester" size="1">
+                    <option selected>Курс...</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="list">
+                <select name="group" size="1">
+                    <option selected>Группа...</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="btn-reg" id="at-reg">
+                <button type="submit">Зарегистрироваться</button>
+                <a href="authentication.php" class="to-auth">Войти</a>
+            </div>
+        </form>
+    </div>
 </body>
-</html>
 
 <?php
 	require_once 'login.php';
