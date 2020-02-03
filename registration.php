@@ -1,10 +1,34 @@
 <?php
     $title = "Регистрация";
     require_once 'head.php';
+    $error = '';
 ?>
+<script>
+    /*
+    var roleList = document.getElementsByName('role');
+    roleList.onclick = function () {
+        if (roleList.value === "student") {
+            document.getElementsByName('semester').style.display = 'block';
+            document.getElementsByName('group').style.display = 'block';
+        }
+    }*/
+    function showSelectorsForStudent(value) {
+        if (value == 'student') {
+            document.getElementById('semester').style.display = 'block';
+            document.getElementById('group').style.display = 'block';
+        }
+        else {
+            document.getElementById('semester').style.display = 'none';
+            document.getElementById('group').style.display = 'none';
+        }
+    }
+</script>
 <body class="auth">
     <div class="reg">
         <form method="post" action="registration.php">
+            <div class="errors">
+                <?php echo $error ?>
+            </div>
             <div class="str-input-reg">
                 <label for="surname">Фамилия</label>
                 <input type="text" name="surname" maxlength="32">
@@ -25,14 +49,14 @@
                 <label for="password">Пароль</label>
                 <input type="password" name="password" maxlength="50">
             </div>
-            <div class="list">
-                <select name="role" size="1">
+            <div class="list" id="role-list">
+                <select name="role" size="1" onchange="showSelectorsForStudent(this.value)">
                     <option selected>Выберите...</option>
                     <option value="lecturer">Преподаватель</option>
                     <option value="student">Студент</option>
                 </select>
             </div>
-            <div class="list">
+            <div class="list" id="semester">
                 <select name="semester" size="1">
                     <option selected>Курс...</option>
                     <option value="1">1</option>
@@ -41,7 +65,7 @@
                     <option value="4">4</option>
                 </select>
             </div>
-            <div class="list">
+            <div class="list" id="group">
                 <select name="group" size="1">
                     <option selected>Группа...</option>
                     <option value="1">1</option>

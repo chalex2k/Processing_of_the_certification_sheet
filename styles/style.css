@@ -151,7 +151,7 @@ div.btn-auth {
 	margin-top: 70px;
 }
 div.errors {
-	height: 50px;
+	height: auto;
 }
 
 /* registration form */
@@ -173,6 +173,9 @@ div.list select {
 	color: #3d3735;
 	width: 100%;
 	height: 30px;
+}
+div#semester, div#group {
+	display: none;
 }
 div.str-input-reg {
 	margin-top: 15px;
