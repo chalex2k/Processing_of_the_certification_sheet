@@ -67,7 +67,7 @@
 	$connection->close();
 
 ?>
-<script src="js/validate_forms.js"></script>
+<!--<script src="js/validate_forms.js"></script>-->
 <script>
     /*
     var roleList = document.getElementsByName('role');

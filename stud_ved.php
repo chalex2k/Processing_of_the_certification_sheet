@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-<?php 
-	$title = "Студент";
-	require_once 'head.php';
-?>
-</head>
+
 <body>
 	<div>
 		<a href="messages.php">Сообщения</a>
@@ -23,4 +16,3 @@
 		<a href="logout.php">Выйти</a>
 	</div>	
 </body>
-</html>
