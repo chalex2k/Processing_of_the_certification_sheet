@@ -1,13 +1,14 @@
 <?php
-	// добавить всплывающие уведомления, вместо кнопок удалить можно использовать иконки корзины, может убрать функции, которые и обращаются в базу и генерируют html, некотороые ошибки фатальные, при которых программа не может дальше работать, а после некоторых можно продолжить выполнение.		 
+	// добавить всплывающие уведомления, вместо кнопок удалить можно использовать иконки корзины, некотороые ошибки фатальные, при которых программа не может дальше работать, а после некоторых можно продолжить выполнение.		 
 	require('header_lect.php');
 	require('render.php');
-
-	$subjects = get_users_subjects($user_email);
-	$notice = '';
-	if (add_subject($user_email, $notice) || delete_subject($subjects, $user_email, $notice))
-		 $subjects = get_users_subjects($user_email);
-	$all_subj = get_all_subjects();
+	try
+	{
+		$subjects = get_users_subjects($user_email);
+		$notice = '';
+		if (add_subject($user_email, $notice) || delete_subject($subjects, $user_email, $notice))
+			$subjects = get_users_subjects($user_email);
+		$all_subj = get_all_subjects();
 
 	return render('layout',
 		['title' => $title,
@@ -15,6 +16,11 @@
 		 'header' => render('lect_header', []),
 		 'content' => render('lect_subjects', ['subjects' => $subjects, 'all_subjects' => $all_subj, 'notice' => $notice])]
 		);
+	}
+	catch(Exception $exp)
+	{
+		return render('error', []);
+	}
 
 
 	// Читает из БД все предметы пользователя. Возвращает массив [id_предмета] => название_предмета (оценка)|(зачёт).
@@ -30,7 +36,7 @@
 							WHERE lecturer_id = '$user_email')
 					ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception();
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
@@ -49,13 +55,13 @@
 		$subj_id = $_POST['subject'];
 		$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$user_email' AND subject_id = '$subj_id'";
 		$result = $connection -> query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception();
 		$rows = $result->num_rows;
 		if ($rows == 0)
 		{
 			$query = "INSERT INTO lecturer_subject VALUES('$user_email', '$subj_id')";
 			$result = $connection -> query($query);
-			if (! $result) show_error_message();
+			if (! $result) throw new Exception();
 			$notice = "Предмет добавлен";
 			return True;
 		}
@@ -76,7 +82,7 @@
 			{
 				$query  = "DELETE FROM lecturer_subject WHERE lecturer_id = '$user_email' AND subject_id = '$id' ";
 				$result = $connection -> query($query);
-				if (! $result) show_error_message();
+				if (! $result) throw new Exception();
 				$notice = "предмет удалён $id";
 				return True;
 			}
@@ -91,7 +97,7 @@
 		$subjects = array();
 		$query = "SELECT id, name, mark FROM subject ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception();
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
