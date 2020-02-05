@@ -4,7 +4,6 @@
     $title = "Авторизация";
     require_once 'head.php';
     ?>
-    <script src="js/validate_forms.js"></script>
 </head>
 
 <?php

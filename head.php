@@ -32,6 +32,7 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'> 
     <link rel="stylesheet" href="styles/style.css">
+<!--<script src="js/validate_forms.js"></script>-->
 	<!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery.noty.js"></script>
 
