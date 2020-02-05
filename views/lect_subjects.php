@@ -1,4 +1,6 @@
 <div class='lect-subjects'>
+	<?php if($notice) 
+		echo("$notice <br>"); ?>
 	<form method="POST" action="lect_subjects.php">
 		<?php
 		foreach ($subjects as $id => $name)

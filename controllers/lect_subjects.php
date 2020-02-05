@@ -4,15 +4,16 @@
 	require('render.php');
 
 	$subjects = get_users_subjects($user_email);
-	if (add_subject($user_email) || delete_subject($subjects, $user_email))
-		$subjects = get_users_subjects($user_email);
+	$notice = '';
+	if (add_subject($user_email, $notice) || delete_subject($subjects, $user_email, $notice))
+		 $subjects = get_users_subjects($user_email);
 	$all_subj = get_all_subjects();
 
 	return render('layout',
 		['title' => $title,
 		 'userstr' => $userstr,
 		 'header' => render('lect_header', []),
-		 'content' => render('lect_subjects', array('subjects' => $subjects, 'all_subjects' => $all_subj))]
+		 'content' => render('lect_subjects', ['subjects' => $subjects, 'all_subjects' => $all_subj, 'notice' => $notice])]
 		);
 
 
@@ -40,7 +41,7 @@
 	}
 
 	// Добавляет в БД пользователю предмет с id из массива POST (если он сущствует). Возвращает True, если предмет был добавлен, False иначе. 
-	function add_subject($user_email)
+	function add_subject($user_email, &$notice)
 	{
 		if (! isset($_POST['add']))
 			return False;
@@ -55,18 +56,18 @@
 			$query = "INSERT INTO lecturer_subject VALUES('$user_email', '$subj_id')";
 			$result = $connection -> query($query);
 			if (! $result) show_error_message();
-			echo "<br> Уведомление : Предмет добавлен <br>";
+			$notice = "Предмет добавлен";
 			return True;
 		}
 		else
 		{		
-			echo "<br> Уведомление : Предмет существует <br>";
+			$notice = "Предмет существует";
 			return False;
 		}
 	}
 
 	// Удаляет предмет из БД, если его id указан в POST. Возвращает True, если предмет был удалён, False иначе.
-	function delete_subject($subjects, $user_email)
+	function delete_subject($subjects, $user_email, &$notice)
 	{
 		global $connection;
 		foreach ($subjects as $id => $name)
@@ -76,7 +77,7 @@
 				$query  = "DELETE FROM lecturer_subject WHERE lecturer_id = '$user_email' AND subject_id = '$id' ";
 				$result = $connection -> query($query);
 				if (! $result) show_error_message();
-				echo("<br> Уведомление: предмет удалён $id <br>");
+				$notice = "предмет удалён $id";
 				return True;
 			}
 		}
