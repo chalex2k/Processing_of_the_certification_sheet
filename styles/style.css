@@ -260,3 +260,41 @@ table.ved td {
 table.ved #subject {
 	width: 40%;
 }
+
+/* stud_rating.php */
+div.settings {
+	margin: 5% auto;
+	width: 90%;
+	height: 40px;
+	display: flex;
+	text-align: center;
+}
+.settings form {
+	width: 100%;
+	display: block;
+	margin: 0 auto;
+}
+div.settings .rating-settings {
+	display: inline;
+}
+div.rating-settings select {
+	height: 30px;
+	width: 20%;
+	margin: 10px 5px;
+}
+.rating-settings button {
+	width: 15%;
+	height: 30px;
+	margin: 10px 20px;
+	font-size: 15px;
+	color: #3d3735;
+	border: 1px solid #957559;
+}
+.rating-settings button:hover {
+	background-color: #faa2a0;
+}
+/*
+div#table-rating {
+    display: none;
+}
+ */
