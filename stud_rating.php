@@ -18,19 +18,7 @@
         header('Location: index.php');
     }
 ?>
-<script>
-    function showRatingTable() {
-        group = document.getElementById('gp');
-        subject = document.getElementById('sb');
-        if (group.options.selectedIndex > 0 && subject.options.selectedIndex > 0) {
-            document.getElementById('table-rating').style.display = "block";
-        }
-        else {
-            document.getElementById('table-rating').style.display = "none";
-        }
 
-    }
-</script>
 <body>
     <div class="settings">
         <form action="stud_rating.php" method="post">
@@ -67,7 +55,7 @@
             </div>
         </form>
     </div>
-    <div class="table">
+    <div id="table-rating">
         <table class="ved">
             <tr id="hat"><th>Студент</th><th>1</th><th>2</th><th>3</th><th>Средний балл</th></tr>
             <?php
@@ -106,6 +94,11 @@
                                                         and m3.attestation_number = '3') att3 on att2.id = att3.id
                                                         order by avg_mark desc
                                                         ");
+                    $group_rating = query_mysql($connection, "select avg(m.mark) as 'gr_mark'
+                                                        from mark m, student s
+                                                        where s._group = '$group'
+                                                        and m.student_id = s.id
+                                                        and m.subject_id = '$subject'");
                     if ($table->num_rows) {
                         while ($row = $table->fetch_assoc()) {
                             echo "<tr>";
@@ -133,10 +126,24 @@
                         }
 
                     }
+                    if ($group_rating->num_rows) {
+                        $row = $group_rating->fetch_assoc();
+                        if (isset($row)) {
+                            echo "<tr id='group-mark'>";
+                            echo "<td colspan='4'>Средний балл группы: </td>";
+                            echo "<td>" . $row['gr_mark'] . "</td>";
+                            echo "</tr";
+                        }
+                    }
                 }
             ?>
         </table>
     </div>
 </body>
+<script>
+    function showRatingTable() {
+            document.getElementById('table-rating').style.display = "block";
+    }
+</script>
 
 
