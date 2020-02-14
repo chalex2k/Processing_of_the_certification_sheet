@@ -256,6 +256,7 @@ table.ved td {
 	text-align: center;
 	height: 60px;
 	background-color: #e1ddca;
+	min-width: 30px;
 }
 table.ved #subject {
 	width: 40%;
