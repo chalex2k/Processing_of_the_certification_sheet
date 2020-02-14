@@ -17,6 +17,17 @@
     {
         header('Location: index.php');
     }
+
+    function calculate_avg_mark($marks) {
+        $sum = 0; $i = 0.0;
+        do {
+            $sum += $marks["$i"];
+            $i += 1;
+        } while (isset($marks["$i"]));
+        if ($i)
+            return $sum / $i;
+        else return 0;
+    }
 ?>
 
 <body>
@@ -57,49 +68,51 @@
     </div>
     <div id="table-rating">
         <table class="ved">
-            <tr id="hat"><th>Студент</th><th>1</th><th>2</th><th>3</th><th>Средний балл</th></tr>
             <?php
                 if (isset($_POST['group']) && isset($_POST['subject']))
                 {
                     $subject = $_POST['subject'];
                     $group = $_POST['group'];
 
-                    $table = query_mysql($connection, "select att1.student as 'student',
-                                                        att1.mark as 'att1', att2.mark as 'att2', att3.mark as 'att3',
-                                                        (att1.mark + att2.mark + att3.mark)/3 as avg_mark                                                      
+                    $table = query_mysql($connection, "select distinct stud.stud_id, stud.student as 'student',
+                                                        att1.mark as 'att1', att2.mark as 'att2', att3.mark as 'att3'                                                    
                                                         from
-                                                        (select concat_ws(' ', u1.surname, u1.name, u1.middle_name) as 'student', 
-                                                        ifnull(m1.mark, 0) as 'mark', u1.id as 'id'
-                                                        from user u1, student s1, mark m1
-                                                        where s1._group = '$group'
-                                                        and u1.id = s1.id
-                                                        and m1.student_id = s1.id
+                                                        (select concat_ws(' ', u.surname, u.name, u.middle_name) as 'student',
+                                                                u.id as 'stud_id'
+                                                        from user u, student s
+                                                        where s._group = '$group'
+                                                        and s.semester = '$semester'
+                                                        and u.id = s.id) as stud
+                                                        left join
+                                                        (select m1.mark as 'mark', s1.id as 'id'
+                                                        from student s1, mark m1
+                                                        where m1.student_id = s1.id
                                                         and m1.subject_id = '$subject'
-                                                        and m1.attestation_number = '1') att1
+                                                        and m1.attestation_number = '1') as att1 on att1.id = stud.stud_id
                                                         left outer join
-                                                        (select ifnull(m2.mark, 0) as 'mark', u2.id as 'id'
-                                                        from user u2, student s2, mark m2
-                                                        where s2._group = '$group'
-                                                        and u2.id = s2.id
-                                                        and m2.student_id = s2.id
+                                                        (select m2.mark as 'mark', s2.id as 'id'
+                                                        from student s2, mark m2
+                                                        where m2.student_id = s2.id
                                                         and m2.subject_id = '$subject'
-                                                        and m2.attestation_number = '2') att2 on att1.id = att2.id
+                                                        and m2.attestation_number = '2') as att2 on att2.id = stud.stud_id
                                                         left outer join
-                                                        (select ifnull(m3.mark, 0) as 'mark', u3.id as 'id'
+                                                        (select m3.mark as 'mark', s3.id as 'id'
                                                         from user u3, student s3, mark m3
-                                                        where s3._group = '$group'
-                                                        and u3.id = s3.id
-                                                        and m3.student_id = s3.id
+                                                        where m3.student_id = s3.id
                                                         and m3.subject_id = '$subject'
-                                                        and m3.attestation_number = '3') att3 on att2.id = att3.id
-                                                        order by avg_mark desc
+                                                        and m3.attestation_number = '3') as att3 on att3.id = stud.stud_id
+                                                        order by    (att1.mark + att2.mark + att3.mark) desc,
+                                                                    (att1.mark + att2.mark) desc,
+                                                                    (att1) desc
                                                         ");
                     $group_rating = query_mysql($connection, "select avg(m.mark) as 'gr_mark'
                                                         from mark m, student s
                                                         where s._group = '$group'
+                                                        and s.semester = '$semester'
                                                         and m.student_id = s.id
                                                         and m.subject_id = '$subject'");
                     if ($table->num_rows) {
+                        echo "<tr id=\"hat\"><th>Студент</th><th>1</th><th>2</th><th>3</th><th>Средний балл</th></tr>";
                         while ($row = $table->fetch_assoc()) {
                             echo "<tr>";
                                 if (isset($row['student'])) {
@@ -118,17 +131,18 @@
                                     echo "<td>" . $row['att3'] . "</td>";
                                 }
                                 else echo "<td></td>";
-                                if (isset($row['avg_mark'])) {
-                                    echo "<td>" . $row['avg_mark'] . "</td>";
+                                if ($avg_mark = calculate_avg_mark(array($row['att1'], $row['att2'], $row['att3']))) {
+                                    echo "<td>" . $avg_mark . "</td>";
                                 }
                                 else echo "<td></td>";
                             echo "</tr>";
                         }
 
                     }
+                    else echo "<td colspan='5'>Нет данных</td>";
                     if ($group_rating->num_rows) {
                         $row = $group_rating->fetch_assoc();
-                        if (isset($row)) {
+                        if ($row['gr_mark']) {
                             echo "<tr id='group-mark'>";
                             echo "<td colspan='4'>Средний балл группы: </td>";
                             echo "<td>" . $row['gr_mark'] . "</td>";
@@ -142,7 +156,6 @@
 </body>
 <script>
     function showRatingTable() {
-            document.getElementById('table-rating').style.display = "block";
     }
 </script>
 
