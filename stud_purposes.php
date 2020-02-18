@@ -4,9 +4,8 @@
 	require_once 'stud_functions.php';
 	require_once 'check_access.php';
 
-    $user = get_user($connection, $user_email);
-    if ($who == 'student')
-    {
+    if (isset($user_email) and check_role($connection, $user_email) == 'student') {
+        $user = get_user($connection, $user_email);
         $student = get_student($connection, $user['id']);
         $semester = $student['semester'];
         $stud_id = $student['id'];
