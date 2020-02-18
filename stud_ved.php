@@ -46,7 +46,6 @@ $result = query_mysql($connection, "select att1.subject as 'subject', att1.mark 
         <table class="ved">
             <tr id="hat"><th id="subject">Предмет</th><th>1</th><th>2</th><th>3</th></tr>
             <?php
-
                 $result->data_seek(0);
                 while ($row = $result->fetch_assoc())
                 {
