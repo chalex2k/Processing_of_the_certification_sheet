@@ -2,6 +2,7 @@
     $title = "Мои баллы";
     require_once "header_stud.php";
     require_once "functions.php";
+    require_once "check_access.php";
 
     if (isset($user_email) and check_role($connection, $user_email) == 'student') {
         $result = query_mysql($connection, "select att1.subject as 'subject', att1.mark as 'att1', att2.mark as 'att2', att3.mark as 'att3'
