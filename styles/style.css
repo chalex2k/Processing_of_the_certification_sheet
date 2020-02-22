@@ -293,7 +293,37 @@ div.rating-settings select {
 }
 .rating-settings button:hover {
 	background-color: #faa2a0;
-}/*
-div#table-rating {
-    display: none;
-}*/
+}
+
+/* stud_purposes.php */
+.table {
+	margin-bottom: 0;
+}
+.table form {
+	text-align: center;
+	margin-bottom: 0;
+}
+table.ved {
+	margin-bottom: 20px;
+}
+td input.input-mark {
+	height: 50px;
+	width: 150px;
+	margin: 0;
+	background-color: #e1ddca;
+	border: none;
+	font-size: 20px;
+	text-align: center;
+	color: #3d3735;
+}
+button.save {
+	margin: 0 auto;
+	width: 30%;
+	height: 35px;
+	border: 1px solid #c4c0b0;
+	font-size: 17px;
+	color: #3d3735;
+}
+button.save:hover {
+	background-color: #faa2a0;
+}
