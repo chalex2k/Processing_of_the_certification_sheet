@@ -15,7 +15,7 @@
         header('Location: index.php');
     }
 
-    $result = query_mysql($connection, "select subjects.subject as 'subject', exp_marks.exp_mark as 'exp_mark', real_marks.real_mark as 'mark', real_marks.student_id as 'student'
+    $result = query_mysql($connection, "select subjects.subject_id as 'subj_id', subjects.subject as 'subject', exp_marks.exp_mark as 'exp_mark', real_marks.real_mark as 'mark'
                                                 from 
                                                 (select s.name as 'subject', s.id as 'subject_id'
                                                 from subject s, subject_semester ss
@@ -29,35 +29,64 @@
                                                 left outer join 
                                                 (select em.mark as 'exp_mark', em.subject_id as 'subject_id', em.student_id as 'student_id'
                                                 from expected_mark em
-                                                where em.student_id = '$stud_id') exp_marks on exp_marks.subject_id = subjects.subject_id 
-                                                and real_marks.student_id = exp_marks.student_id
+                                                where em.student_id = '$stud_id') exp_marks on exp_marks.subject_id = subjects.subject_id
+                                                order by subject
                                               ");
 ?>
 
 <body>
     <div class="table">
-        <table class="ved">
-            <tr id="hat"><th id="subject">Предмет</th><th>Цель</th><th>Реальный балл</th></tr>
-            <?php
-            $result->data_seek(0);
-            while ($row = $result->fetch_assoc())
-            {
-                echo '<tr>';
-                echo '<td id="subject">' . $row['subject'] . '</td>';
-                if (isset($row['exp_mark'])) {
-                    echo '<td>' . $row['exp_mark'] . '</td>';
-                }
-                else {
-                    echo '<td></td>';
-                }
-                if (isset($row['mark'])) {
-                    echo '<td>' . $row['mark'] . '</td>';
-                }
-                else {
-                    echo '<td></td>';
-                }
-            }
-            ?>
-        </table>
+        <form action="stud_purposes.php" method="post">
+            <table class="ved">
+                    <tr id="hat"><th id="subject">Предмет</th><th>Цель</th><th>Реальный балл</th></tr>
+                    <?php
+                    $result->data_seek(0);
+                    while ($row = $result->fetch_assoc())
+                    {
+                        echo '<tr>';
+                        echo '<td id="subject">' . $row['subject'] . '</td>';
+                        if (isset($row['exp_mark'])) {
+                            echo '<td><input class="input-mark" type="text" name="' . $row['subj_id'] . ' " value="' . $row['exp_mark'] . '"></td>';
+                        }
+                        else {
+                            echo '<td><input class="input-mark" type="text" name="' . $row['subj_id'] . '"></td>';
+                        }
+                        if (isset($row['mark'])) {
+                            echo '<td>' . $row['mark'] . '</td>';
+                        }
+                        else {
+                            echo '<td></td>';
+                        }
+                    }
+                    if (isset($_POST['save-btn'])) {
+                        print_r($_POST);
+                        foreach ($_POST as $subj_id => $mark) {
+                            if (!empty($mark)) {
+                                $is_mark = query_mysql($connection, "select em.mark  as 'mark'
+                                                                        from expected_mark em 
+                                                                        where em.student_id = '$stud_id'
+                                                                        and em.subject_id = '$subj_id'");
+                                if ($is_mark->num_rows) {
+                                    print_r($is_mark->num_rows);
+                                    $row = $is_mark->fetch_assoc();
+                                    print_r($row);
+                                    if ($row['mark'] != $mark) {
+                                        $update_mark = query_mysql($connection, "update expected_mark set mark = '$mark' 
+                                                where student_id = '$stud_id'
+                                                and subject_id = '$subj_id'");
+                                    }
+                                }
+                                else {
+                                    print_r($mark);
+                                    $insert_mark = query_mysql($connection, "insert into expected_mark values(null, '$stud_id', '$subj_id', '$mark')");
+                                }
+                            }
+                        }
+                        header( "Location: stud_purposes.php");
+                    }
+                    ?>
+            </table>
+            <button class="save" type="submit" name="save-btn">Сохранить</button>
+        </form>
     </div>
 </body>
