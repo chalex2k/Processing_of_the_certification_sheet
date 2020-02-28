@@ -3,9 +3,6 @@ require_once 'head.php';
 ?>
 <div class="header">
     <div class="menu">
-        <a href="messages.php">Сообщения</a>
-    </div>
-    <div class="menu">
         <a href="stud_purposes.php">Цели</a>
     </div>
     <div class="menu">
