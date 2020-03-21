@@ -1,4 +1,4 @@
-<div class = 'lect-ved'>";
+<div class = 'lect-ved'>
 	<div class='lect-ved-item'>
 		<div class='ved-form'>
 			<form method="POST" action="lect_ved.php">

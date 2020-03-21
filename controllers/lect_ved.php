@@ -1,59 +1,64 @@
 <?php      					// !!! сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет.  Проверка оценок которые пришли от пользователя
 			// !!! если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
 			// удалять файл ведомости после обработки
-			// update_DB рализовать через исключения. И вообще всё реализовать через исключения.
-	require_once 'header_lect.php';  
-	require('render.php');
-	
-	$ok = false;
-	$send = false;
-	$save = false;
-	$subject = Null;
-	$group = Null;
-	$semester = Null;
-	if (isset($_POST['ok'])) 
+	try
 	{
-		$ok = true;
-		$group =  $_POST['group'];
-		$semester = $_POST['semester'];
-		$subject = $_POST['subject'];
-		setcookie('group', $group);
-		setcookie('semester', $semester);
-		setcookie('subject_id', $subject);
-		$list = get_list($group, $semester, $subject);
-		//var_dump($list);
-	}
-	if (isset($_POST['send']))
-	{	
-		if(isset($_FILES) && $_FILES['user_file']['error'] == 0)
-		{ // Проверяем, загрузил ли пользователь файл
-			$destiation_dir = dirname(__FILE__) .'/' . $_FILES['user_file']['name']; // Директория для размещения файла
-			move_uploaded_file($_FILES['user_file']['tmp_name'], $destiation_dir ); // Перемещаем файл в желаемую директорию
-			//echo 'File Uploaded';  // Оповещаем пользователя об успешной загрузке файла
-			$arr = read_exel_file($_FILES['user_file']['name']);
-			// echo("<br>". $_FILES['user_file']['name']);
-			$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id']);	
-			update_list_from_file($arr, $list);
-			set_new_marks($list);
-			$send = true;
-			unlink($destiation_dir); //?
+		require_once 'header_lect.php';  
+		require 'render.php' ;
+		
+		$ok = false;
+		$send = false;
+		$save = false;
+		$subject = Null;
+		$group = Null;
+		$semester = Null;
+		$list = Null;
+		if (isset($_POST['ok'])) 
+		{
+			$ok = true;
+			$group =  $_POST['group'];
+			$semester = $_POST['semester'];
+			$subject = $_POST['subject'];
+			setcookie('group', $group);
+			setcookie('semester', $semester);
+			setcookie('subject_id', $subject);
+			$list = get_list($group, $semester, $subject);
 		}
+		if (isset($_POST['send']))
+		{	
+			if(isset($_FILES) && $_FILES['user_file']['error'] == 0)
+			{ // Проверяем, загрузил ли пользователь файл
+				$destiation_dir = dirname(__FILE__) .'/' . $_FILES['user_file']['name']; // Директория для размещения файла
+				move_uploaded_file($_FILES['user_file']['tmp_name'], $destiation_dir ); // Перемещаем файл в желаемую директорию
+				//echo 'File Uploaded';  // Оповещаем пользователя об успешной загрузке файла
+				$arr = read_exel_file($_FILES['user_file']['name']);
+				// echo("<br>". $_FILES['user_file']['name']);
+				$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id']);	
+				update_list_from_file($arr, $list);
+				set_new_marks($list);
+				$send = true;
+				unlink($destiation_dir); //?
+			}
+		}
+		if (isset($_POST['save']))
+		{	
+			$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);
+			get_new_marks($list);
+			update_DB($list);
+			$save = true;
+			set_new_marks($list);
+		}
+		$subjects = get_users_subjects($user_email);
+		return render('layout',
+			['title' => $title,
+			'userstr' => $userstr,
+			'header' => render('lect_header', []),
+			'content' => render('lect_ved', ['subjects' => $subjects, 'semester' => $semester, 'subject' => $subject, 'group' => $group, 'table' => $ok, 'save' => $save, 'send' => $send, 'list' => $list])]);
 	}
-	if (isset($_POST['save']))
-	{	
-		$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);
-		get_new_marks($list);
-		update_DB($list);
-		$save = true;
-		set_new_marks($list);
+	catch(Exception $exp)
+	{
+		return render('error', ['error_msg' => $exp->getMessage()]);
 	}
-	$subjects = get_users_subjects($user_email);
-	return render('layout',
-		['title' => $title,
-		 'userstr' => $userstr,
-		 'header' => render('lect_header', []),
-		 'content' => render('lect_ved', ['subjects' => $subjects, 'semester' => $semester, 'subject' => $subject, 'group' => $group, 'table' => $ok, 'save' => $save, 'send' => $send, 'list' => $list])]);
-
 
 
 	function get_new_marks($list)
@@ -82,7 +87,7 @@
 							WHERE lecturer_id = '$user_email')
 					ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
@@ -102,7 +107,7 @@
 							FROM student 
 							WHERE semester = $semester AND _group = $group)";		
 		$result = $connection -> query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$list = array();
 		while ($student = $result -> fetch_array(MYSQLI_ASSOC))
@@ -115,7 +120,7 @@
 							FROM mark 
 							WHERE subject_id = $subject_id AND student_id = '$student_id'";
 			$result2 = $connection -> query($query2);
-			if (! $result2) show_error_message($connection -> error);
+			if (! $result2) throw new Exception('Ошибка при запосе к БД');
 			$result2 -> data_seek(0);
 			while ($mark = $result2 -> fetch_array(MYSQLI_ASSOC))
 				$row[$mark['attestation_number']] = new Mark($mark['id'], $mark['mark']);
@@ -152,14 +157,14 @@
 						$subj_id = $_COOKIE['subject_id'];
 						$query = "INSERT INTO mark VALUES(NULL, '$stud_id', '$subj_id', '$new_mark', '$i')";
 						$result = $connection -> query($query);
-						if (! $result) return false;
+						if (! $result) throw new Exception('Ошибка при запосе к БД');
 					}
 					elseif ($row[$i] -> new_value == '')
 					{
 						$id = $row[$i] -> id;
 						$query = "DELETE FROM mark WHERE id = $id";
 						$result = $connection -> query($query);
-						if (! $result) return false;
+						if (! $result) throw new Exception('Ошибка при запосе к БД');
 					}
 					else
 					{
@@ -167,10 +172,9 @@
 							$new_mark = $row[$i] -> new_value;
 							$query = "UPDATE mark SET mark = $new_mark WHERE id = $id";
 							$result = $connection -> query($query);
-							if (! $result) return false;
+							if (! $result) throw new Exception('Ошибка при запосе к БД');
 					}
 				}	
-		return true;
 	}
 	
 	function set_new_marks($list)
@@ -246,11 +250,11 @@
 			for ($row = 0; $row < count($arr); $row++)
 			{
 				$cell = $arr[$row][$col];
-				echo "ячейка $cell <br>";
+				//echo "ячейка $cell <br>";
 				if ((int)$arr[$row][$col] >= 0 and (int)$arr[$row][$col] <= 50) 
 				{  // это оценка, отдельная ячейка
 					if ($arr[$row][$col] != ''){
-					echo "это оценка <br>";
+					//echo "это оценка <br>";
 					$count_marks++;}
 				}
 				else goto m1;

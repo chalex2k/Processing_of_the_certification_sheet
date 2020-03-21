@@ -21,7 +21,7 @@
 	
 	require_once 'login.php';
 	$connection = new mysqli($hostname, $username, $password, $database);
-	if ($connection->connect_error) die("Fatal Error: $connection->connect_error"); // ссылка на страницу с ошибкой и завершение
+	if ($connection->connect_error) throw new Exception("Ошибка при запосе к БД $connection->connect_error");
 	query_mysql($connection, "SET NAMES utf8");
 
 ?>

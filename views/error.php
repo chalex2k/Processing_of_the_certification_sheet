@@ -9,6 +9,7 @@
   <body>
     <div class="mistake">
       Извините. Произошла ошибка.
+	  <br> <?= $error_msg; ?>
     </div>
   </body>
 </html>

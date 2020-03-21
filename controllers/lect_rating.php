@@ -1,33 +1,41 @@
 <?php
-	require('header_lect.php');// при пустой странице писать выберите группу
-	require('render.php');// сохранение данных формы при обновлении страницы
-	$subjects = get_users_subjects($user_email);
-	$ok = false;
-	$rating = Null;
-	$middle_mark = Null;
-	$total_middle_mark = Null;
-	$subject = Null;
-	$group = Null;
-	if (isset($_POST['ok']))
+	try
 	{
-		$ok = true;
-		$rating = get_rating($_POST['group'], $_POST['semester'], $_POST['subject']);
-		if ($_POST['mode'] == 'alph')
-			ksort($rating);
-		else
-			arsort($rating);
-		$group =  $_POST['group'];
-		$subject = get_subject_name($_POST['subject']);
-		$temp_rating = $rating;
-		delete_emty($temp_rating);
-		$total_middle_mark = array_sum($temp_rating) / count($temp_rating); // division by zero when marks isn't in group
+		require('header_lect.php');// при пустой странице писать выберите группу
+		require('render.php');// сохранение данных формы при обновлении страницы
+		$subjects = get_users_subjects($user_email);
+		$ok = false;
+		$rating = Null;
+		$middle_mark = Null;
+		$total_middle_mark = Null;
+		$subject = Null;
+		$group = Null;
+		if (isset($_POST['ok']))
+		{
+			$ok = true;
+			$rating = get_rating($_POST['group'], $_POST['semester'], $_POST['subject']);
+			if ($_POST['mode'] == 'alph')
+				ksort($rating);
+			else
+				arsort($rating);
+			$group =  $_POST['group'];
+			$subject = get_subject_name($_POST['subject']);
+			$temp_rating = $rating;
+			delete_emty($temp_rating);
+			$total_middle_mark = (count($temp_rating) > 0) ? array_sum($temp_rating) / count($temp_rating) : '-';
+		}
+		return render('layout',
+			['title' => $title,
+			'userstr' => $userstr,
+			'header' => render('lect_header', []),
+			'content' => render('lect_rating', ['subjects' => $subjects, 'subject' => $subject, 'group' => $group, 'table' => $ok, 'rating' => $rating, 'middle_mark' => $middle_mark, 'total_middle_mark' => $total_middle_mark])]);
 	}
-	return render('layout',
-		['title' => $title,
-		 'userstr' => $userstr,
-		 'header' => render('lect_header', []),
-		 'content' => render('lect_rating', ['subjects' => $subjects, 'subject' => $subject, 'group' => $group, 'table' => $ok, 'rating' => $rating, 'middle_mark' => $middle_mark, 'total_middle_mark' => $total_middle_mark])]);
-
+	catch(Exception $exp)
+	{
+		return render('error', ['error_msg' => $exp->getMessage()]);
+	}
+	
+	
 	// Получает средние оценки студентов в группе. Возвращает массив ['Фамилия. И.'] => средний балл.
 	function get_rating($group, $semester, $subject_id)
 	{
@@ -46,7 +54,7 @@
 						ON user.email = mark.student_id
 						GROUP BY user.surname, user.name, user.email";
 		$result = $connection -> query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$rating = array();
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
@@ -69,7 +77,7 @@
 							WHERE lecturer_id = '$user_email')
 					ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
@@ -95,7 +103,7 @@
 					FROM subject 
 					WHERE id = $subject_id;";
 		$result = $connection->query($query);
-		if (! $result) show_error_message();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$row = $result -> fetch_array(MYSQLI_ASSOC);
 		return $row['name'];

@@ -1,9 +1,9 @@
 <?php
 	// добавить всплывающие уведомления, вместо кнопок удалить можно использовать иконки корзины, некотороые ошибки фатальные, при которых программа не может дальше работать, а после некоторых можно продолжить выполнение.		 
-	require('header_lect.php');
-	require('render.php');
 	try
 	{
+		require('header_lect.php');
+		require('render.php');
 		$subjects = get_users_subjects($user_email);
 		$notice = '';
 		if (add_subject($user_email, $notice) || delete_subject($subjects, $user_email, $notice))
@@ -19,7 +19,7 @@
 	}
 	catch(Exception $exp)
 	{
-		return render('error', []);
+		return render('error', ['error_msg' => $exp->getMessage()]);
 	}
 
 
@@ -36,7 +36,7 @@
 							WHERE lecturer_id = '$user_email')
 					ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) throw new Exception();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
@@ -55,13 +55,13 @@
 		$subj_id = $_POST['subject'];
 		$query  = "SELECT * FROM lecturer_subject WHERE lecturer_id = '$user_email' AND subject_id = '$subj_id'";
 		$result = $connection -> query($query);
-		if (! $result) throw new Exception();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$rows = $result->num_rows;
 		if ($rows == 0)
 		{
 			$query = "INSERT INTO lecturer_subject VALUES('$user_email', '$subj_id')";
 			$result = $connection -> query($query);
-			if (! $result) throw new Exception();
+			if (! $result) throw new Exception('Ошибка при запосе к БД');
 			$notice = "Предмет добавлен";
 			return True;
 		}
@@ -82,7 +82,7 @@
 			{
 				$query  = "DELETE FROM lecturer_subject WHERE lecturer_id = '$user_email' AND subject_id = '$id' ";
 				$result = $connection -> query($query);
-				if (! $result) throw new Exception();
+				if (! $result) throw new Exception('Ошибка при запосе к БД');
 				$notice = "предмет удалён $id";
 				return True;
 			}
@@ -97,7 +97,7 @@
 		$subjects = array();
 		$query = "SELECT id, name, mark FROM subject ORDER BY name";
 		$result = $connection->query($query);
-		if (! $result) throw new Exception();
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		while ($row = $result -> fetch_array(MYSQLI_ASSOC))
 		{
