@@ -19,6 +19,7 @@
 			$group =  $_POST['group'];
 			$semester = $_POST['semester'];
 			$subject = $_POST['subject'];
+			echo "main: $group, $semester, $subject";
 			setcookie('group', $group);
 			setcookie('semester', $semester);
 			setcookie('subject_id', $subject);
@@ -73,6 +74,7 @@
 				if ( trim($mark) == '' or (int)$mark >= 0 and (int)$mark <= 50)
 					$list[$j][$i] -> new_value = $mark;
 			}
+		// done!
 	}
 
 	function get_users_subjects($user_email)
@@ -99,23 +101,26 @@
 
 	function get_list($group, $semester, $subject_id)
 	{
+		echo "get_list: $group, $semester, $subject_id";
 		global $connection;
-		$query = "SELECT email, surname, name 
+		$query = "SELECT id, surname, name 
 					FROM user 
-					WHERE user.email IN 
-						(SELECT id 
+					WHERE user.id IN 
+						(SELECT id
 							FROM student 
 							WHERE semester = $semester AND _group = $group)";		
 		$result = $connection -> query($query);
 		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$list = array();
+		echo($result->num_rows);
 		while ($student = $result -> fetch_array(MYSQLI_ASSOC))
 		{
+			//echo var_dump($student);
 			$row = array();
 			$initials = $student['surname'] . '. ' . substr($student['name'], 0, 2) . '.';
-			$row[0] =  new Student($student['email'], $initials);
-			$student_id = $student['email']; 
+			$row[0] =  new Student($student['id'], $initials);
+			$student_id = $student['id']; 
 			$query2 = " SELECT id, mark, attestation_number 
 							FROM mark 
 							WHERE subject_id = $subject_id AND student_id = '$student_id'";
