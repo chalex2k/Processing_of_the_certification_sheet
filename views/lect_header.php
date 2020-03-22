@@ -1,9 +1,16 @@
 <header>
-	<div class="navigation">
-		<a class="nav-item" href="lect_ved.php">Ведомость</a> 
-		<a class="nav-item" href="lect_rating.php">Статистика</a> 
-		<a class="nav-item" href="lect_subjects.php">Мои предметы</a>
-		<a class="nav-item" href="#">Сообщения</a>
-		<a class="nav-item" href="logout.php">Выйти</a>
-	</div>
+	<div class="header">
+		<div class="menu">
+			<a href="lect_ved.php">Ведомость</a>
+		</div>
+		<div class="menu">
+			<a href="lect_rating.php">Статистика</a>
+		</div>
+		<div class="menu">
+			<a href="lect_subjects.php">Мои предметы</a>
+		</div>
+		<div class="menu">
+			<a href="logout.php">Выйти</a>
+		</div>
+    </div>
 </header>
