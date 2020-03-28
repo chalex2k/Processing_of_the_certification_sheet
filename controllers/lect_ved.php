@@ -48,6 +48,7 @@
 			update_DB($list);
 			$save = true;
 			set_new_marks($list);
+			return "saved";
 		}
 		$subjects = get_users_subjects($user_email);
 		return render('layout',

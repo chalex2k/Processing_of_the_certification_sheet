@@ -1,3 +1,26 @@
+<script>
+function getdetails(){
+	let a1 = [];
+	let a2 = [];
+	let a3 = [];
+	console.log(Number(document.getElementById('count_of_students').value));
+	for(let i = 0; i < Number(document.getElementById('count_of_students').value); i++){
+    //a1[i] = $('input[name="att1"]')[i].val();
+	a1.push(document.getElementsByName('att1')[i].value);
+	a2.push(document.getElementsByName('att2')[i].value);
+	a3.push(document.getElementsByName('att3')[i].value);
+	}
+    $.ajax({
+        type: "POST",
+        url: "lect_ved.php",
+        data: {save:true, att1:a1, att2:a2, att3:a3}
+    }).done(function(result)
+        {
+            $("#msg").html( " Request is " + result );
+        });
+}
+</script>
+
 <div class = 'lect-ved'>
 	<div class='lect-ved-item'>
 		<div class='ved-form'>
@@ -55,22 +78,24 @@
 	<div class='lect-ved-item2'>
 		<?php if($table)
 	{
-	echo '<form method="POST" action="lect_ved.php">
-		<table class="ved">';
+		$cnt = count($list);
+	echo ("<form method='POST' action='lect_ved.php'>
+	<input type='hidden' name='count_of_students' id='count_of_students' value='$cnt'>
+		<table class='ved'>");
 	echo '<tr id="hat"><th id="subject">Студент</th><th>1</th><th>2</th><th>3</th></tr>';
 	foreach ($list as $row) // если не все оценки стоят?
 	{
 		echo '<tr> <td id="subject">' . $row[0] -> initials . '"></td>
-				   <td><input type="text" class="input-mark" name="att1[]" value="' . $row[1] -> value . '"></td>
-				   <td><input type="text" class="input-mark" name="att2[]" value="' . $row[2] -> value . '"></td>
-				   <td><input type="text" class="input-mark" name="att3[]" value="' . $row[3] -> value . '"></td>
+				   <td><input type="text" class="input-mark" name="att1" value="' . $row[1] -> value . '"></td>
+				   <td><input type="text" class="input-mark" name="att2" value="' . $row[2] -> value . '"></td>
+				   <td><input type="text" class="input-mark" name="att3" value="' . $row[3] -> value . '"></td>
 			 </tr>';		}	
 	echo '
 	</table>
-	
-	   <button class = "save" type="submit" name="save" value="save">Сохранить</button>
+		 </form>
+	   <input type="button" class = "save" onClick = "getdetails()"  name="save" value="save "/>
        
-	   </form>
+	  
 	   </div> </div>';
 
 	echo '<div class= "input-form">';
@@ -82,6 +107,7 @@
     Загрузить из файла excel: <input name="user_file" type="file" />
     <input type="submit" name = "send" value="Отправить файл" />
 </form>');
+echo '<div id="msg"></div>';
 	echo "</div>";
 	echo "</div>";
 	}
