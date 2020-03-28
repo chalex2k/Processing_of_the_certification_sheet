@@ -10,6 +10,7 @@
 		$total_middle_mark = Null;
 		$subject = Null;
 		$group = Null;
+		$semester = Null;
 		if (isset($_POST['ok']))
 		{
 			$ok = true;
@@ -18,8 +19,9 @@
 				ksort($rating);
 			else
 				arsort($rating);
-			$group =  $_POST['group'];
+			$group = $_POST['group'];
 			$subject = get_subject_name($_POST['subject']);
+			$semester = $_POST['semester'];
 			$temp_rating = $rating;
 			delete_emty($temp_rating);
 			$total_middle_mark = (count($temp_rating) > 0) ? array_sum($temp_rating) / count($temp_rating) : '-';
@@ -28,7 +30,7 @@
 			['title' => $title,
 			'userstr' => $userstr,
 			'header' => render('lect_header', []),
-			'content' => render('lect_rating', ['subjects' => $subjects, 'subject' => $subject, 'group' => $group, 'table' => $ok, 'rating' => $rating, 'middle_mark' => $middle_mark, 'total_middle_mark' => $total_middle_mark])]);
+			'content' => render('lect_rating', ['subjects' => $subjects, 'subject' => $subject, 'group' => $group, 'semester'=>$semester, 'table' => $ok, 'rating' => $rating, 'middle_mark' => $middle_mark, 'total_middle_mark' => $total_middle_mark])]);
 	}
 	catch(Exception $exp)
 	{
@@ -99,13 +101,14 @@
 	function get_subject_name($subject_id)
 	{
 		global $connection;
-		$query = "SELECT name 
+		$query = "SELECT name, mark
 					FROM subject 
 					WHERE id = $subject_id;";
 		$result = $connection->query($query);
 		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$row = $result -> fetch_array(MYSQLI_ASSOC);
-		return $row['name'];
+		$append = ($row['mark'] == 1) ? " (оценка)" : " (зачёт)";
+		return $row['name'] . $append;
 	}
  ?>

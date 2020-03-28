@@ -2,39 +2,39 @@
 	<div class='lect-ved-item'>
 		<div class='ved-form'>
 			<form method="POST" action="lect_rating.php">
+				<div class = 'ved-form-item'>
+				Семестр:
+				</div>
 				<div class="ved-form-item">
 					<select name = 'semester' size = '1'>
-						<option selected >Семестр</option>
-						<option value = '1'> 1 </option>
-						<option value = '2'> 2 </option>
-						<option value = '3'> 3 </option>
-						<option value = '4'> 4 </option>
-						<option value = '5'> 5 </option>
-						<option value = '6'> 6 </option>
-						<option value = '7'> 7 </option>
-						<option value = '8'> 8 </option>
+						<?php
+						for ($i = 1; $i <= 9; $i++)
+							echo("<option " . ($i==$semester? " selected " : " ") . " value = '$i'> $i </option>");
+						?>
 					</select>
+				</div>
+				<div class = 'ved-form-item'>
+				Группа:
 				</div>
 				<div class="ved-form-item">
 					<select name = 'group' size = '1' >
-						<option selected >Группа</option>
-						<option value = '1'> 1 </option>
-						<option value = '2'> 2 </option>
-						<option value = '3'> 3 </option>
-						<option value = '4'> 4 </option>
-						<option value = '5'> 5 </option>
-						<option value = '6'> 6 </option>
-						<option value = '7'> 7 </option>
-						<option value = '8'> 8 </option>
-						<option value = '9'> 9 </option>
+						<?php
+						for ($i = 1; $i <= 9; $i++)
+							echo("<option " . ($i==$group? " selected " : " ") . " value = '$i'> $i </option>");
+						?>
 					</select>
+				</div>
+				<div class = 'ved-form-item'>
+				Предмет:
 				</div>
 				<div class="ved-form-item">
 					<select name = 'subject' size = '1' >
-					<option selected >Предмет</option>
 					<?php foreach ($subjects as $key => $value)
 					{
-						echo "<option value = " . $key . ">" . "$value" . " </option>";
+						echo "<option " ;
+						if($subject == $value)
+							echo "selected ";
+						echo "value = " . $key . ">" . "$value" . " </option>";
 					} ?>
 					</select>
 				</div>

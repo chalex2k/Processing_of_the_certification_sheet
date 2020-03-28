@@ -30,14 +30,10 @@ function getdetails(){
 				</div>
 				<div class = 'ved-form-item'>
 					<select name = 'semester' size = '1'>
-						<option value = '1'> 1 </option>
-						<option value = '2'> 2 </option>
-						<option value = '3'> 3 </option>
-						<option value = '4'> 4 </option>
-						<option value = '5'> 5 </option>
-						<option value = '6'> 6 </option>
-						<option value = '7'> 7 </option>
-						<option value = '8'> 8 </option>
+						<?php
+						for ($i = 1; $i <= 9; $i++)
+							echo("<option " . ($i==$semester? " selected " : " ") . " value = '$i'> $i </option>");
+						?>
 					</select>
 				</div>
 				<div class = 'ved-form-item'>
@@ -45,15 +41,10 @@ function getdetails(){
 				</div>
 				<div class = 'ved-form-item'>
 					<select name = 'group' size = '1' >
-						<option value = '1'> 1 </option>
-						<option value = '2'> 2 </option>
-						<option value = '3'> 3 </option>
-						<option value = '4'> 4 </option>
-						<option value = '5'> 5 </option>
-						<option value = '6'> 6 </option>
-						<option value = '7'> 7 </option>
-						<option value = '8'> 8 </option>
-						<option value = '9'> 9 </option>
+						<?php
+						for ($i = 1; $i <= 9; $i++)
+							echo("<option " . ($i==$group? " selected " : " ") . " value = '$i'> $i </option>");
+						?>
 					</select>
 				</div>
 				<div class = 'ved-form-item'>
@@ -63,7 +54,10 @@ function getdetails(){
 					<select name = 'subject' size = '1' >
 					<?php foreach ($subjects as $key => $value)
 					{
-						echo "<option value = " . $key . ">" . "$value" . " </option>";
+						echo "<option " ;
+						if($subject == $value)
+							echo "selected ";
+						echo "value = " . $key . ">" . "$value" . " </option>";
 					} ?>
 					</select>
 				</div>
@@ -85,7 +79,7 @@ function getdetails(){
 	echo '<tr id="hat"><th id="subject">Студент</th><th>1</th><th>2</th><th>3</th></tr>';
 	foreach ($list as $row) // если не все оценки стоят?
 	{
-		echo '<tr> <td id="subject">' . $row[0] -> initials . '"></td>
+		echo '<tr> <td id="subject">' . $row[0] -> initials . '</td>
 				   <td><input type="text" class="input-mark" name="att1" value="' . $row[1] -> value . '"></td>
 				   <td><input type="text" class="input-mark" name="att2" value="' . $row[2] -> value . '"></td>
 				   <td><input type="text" class="input-mark" name="att3" value="' . $row[3] -> value . '"></td>

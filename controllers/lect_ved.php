@@ -24,6 +24,7 @@
 			setcookie('semester', $semester);
 			setcookie('subject_id', $subject);
 			$list = get_list($group, $semester, $subject);
+			$subject = get_subject_name($subject);
 		}
 		if (isset($_POST['send']))
 		{	
@@ -147,6 +148,21 @@
 		elseif($row1[0] -> initials < $row2[0] -> initials)
 			return -1;
 		return 0;
+	}
+	
+	// Получает название предмета по id из БД и возвращает его.
+	function get_subject_name($subject_id)
+	{
+		global $connection;
+		$query = "SELECT name, mark
+					FROM subject 
+					WHERE id = $subject_id;";
+		$result = $connection->query($query);
+		if (! $result) throw new Exception('Ошибка при запосе к БД');
+		$result -> data_seek(0);
+		$row = $result -> fetch_array(MYSQLI_ASSOC);
+		$append = ($row['mark'] == 1) ? " (оценка)" : " (зачёт)";
+		return $row['name'] . $append;
 	}
 	
 	function update_DB($list)
