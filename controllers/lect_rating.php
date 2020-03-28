@@ -41,7 +41,7 @@
 	{
 		global $connection;	
 		$query = " SELECT user.surname, user.name, ROUND(AVG(mark.mark),2) average 
-					FROM (SELECT email, surname, name 
+					FROM (SELECT id, surname, name 
 								FROM user 
 								WHERE user.id IN 
 									(SELECT id 
@@ -51,8 +51,8 @@
 						(SELECT * 
 							FROM mark 
 							WHERE mark.subject_id = $subject_id) AS mark 
-						ON user.email = mark.student_id
-						GROUP BY user.surname, user.name, user.email";
+						ON user.id = mark.student_id
+						GROUP BY user.surname, user.name, user.id";
 		$result = $connection -> query($query);
 		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
