@@ -1,8 +1,8 @@
 <?php
 	try
 	{
-		require('header_lect.php');// при пустой странице писать выберите группу
-		require('render.php');// сохранение данных формы при обновлении страницы
+		require('header_lect.php');
+		require('render.php');
 		$subjects = get_users_subjects($user_email);
 		$ok = false;
 		$rating = Null;

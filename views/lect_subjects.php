@@ -26,7 +26,7 @@
 			</select>
 			</div>
 			<div class = 'subject-button'> <button type='submit' class = 'del' name='add' value='Добавить'> Добавить </button> </div>
-		</div>
+			</div>
 		</div>
 	</form> 
 </div> 

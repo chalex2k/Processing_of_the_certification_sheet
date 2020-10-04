@@ -16,6 +16,5 @@
       <main class="content"><?= $content; ?></main>
     </div>
 
-    <footer class="main-footer"> Оработка аттестационной ведомости. Авторы как всегда ни за что никакой ответственности не несут.</footer>
   </body>
 </html>

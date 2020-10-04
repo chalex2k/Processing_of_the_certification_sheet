@@ -60,7 +60,7 @@
 		echo "<tr> <td colspan='2'>$subject. Группа $group</td> </tr>";
 		if (count($rating) == 0)
 		{
-			echo "<tr> <td colspan='2'>Никаких студентов не существует! Это всё выдумки.</td> </tr>";
+			echo "<tr> <td colspan='2'>Студенты не найдены</td> </tr>";
 		}
 		else
 		{
@@ -77,7 +77,7 @@
 	}
 	else
 	{
-		echo "<tr> <td colspan='2'>заполните форму справа.</td> </tr>";
+		echo "<tr> <td colspan='2'>Заполните форму справа</td> </tr>";
 	}?>
 	</table>
 	</div>

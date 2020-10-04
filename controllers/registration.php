@@ -51,7 +51,6 @@
             }
         }
         $connection->close();
-
         return render('registration',
             [   'title' => 'Регистрация',
                 'userstr' => $userstr,

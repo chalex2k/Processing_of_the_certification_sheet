@@ -20,6 +20,8 @@
 
 .subject-item{
 	padding:15px 10px;
+	width: 1000px;
+	margin: auto;	
 }
 
 .subject-line{
@@ -27,9 +29,9 @@
 	width: 100%;
 	background: #e1ddca; 
 	padding: 10px;
-	flex-direction: row;
+	fle-direction: row;
 	flex-wrap: nowrap;
-	justify-content: flex-start;
+	justify-content: space-between;
 }
 
 .subject-name{

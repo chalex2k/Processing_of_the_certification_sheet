@@ -1,6 +1,6 @@
-<?php      					// !!! сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет.  Проверка оценок которые пришли от пользователя
-			// !!! если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
-			// удалять файл ведомости после обработки
+<?php      					// todo сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет.  Проверка оценок которые пришли от пользователя
+			// todo если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
+			// todo удалять файл ведомости после обработки
 	try
 	{
 		require_once 'header_lect.php';  
@@ -51,6 +51,14 @@
 			set_new_marks($list);
 			return "saved";
 		}
+
+		if (isset($_POST['load']))
+		{
+			$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);
+			$file = create_file($list);
+			//echo ("$file");
+			setcookie('fn', $file);
+		}
 		$subjects = get_users_subjects($user_email);
 		return render('layout',
 			['title' => $title,
@@ -63,6 +71,69 @@
 		return render('error', ['error_msg' => $exp->getMessage()]);
 	}
 
+	function create_file($list)
+	{
+        	require_once "../phpexcel/Classes/PHPExcel.php";
+                                                    
+$document = new \PHPExcel();
+
+$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
+
+$columnPosition = 0; // Начальная координата x
+$startLine = 2; // Начальная координата y
+
+// Вставляем заголовок в "A2" 
+//$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, 'Our cats');
+
+// Выравниваем по центру
+//$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(
+//    PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+// Объединяем ячейки "A2:C2"
+//$document->getActiveSheet()->mergeCellsByColumnAndRow($columnPosition, $startLine, $columnPosition+2, $startLine);
+
+// Перекидываем указатель на следующую строку
+//$startLine++;
+
+// Массив с названиями столбцов
+$columns = ['Студент', '1', '2', '3'];
+
+// Указатель на первый столбец
+$currentColumn = $columnPosition;
+
+// Формируем шапку
+foreach ($columns as $column) {
+    // Красим ячейку
+    //$sheet->getStyleByColumnAndRow($currentColumn, $startLine)
+     //   ->getFill()
+     //  ->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)
+     //  ->getStartColor()
+     //   ->setRGB('4dbf62');
+
+    $sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $column);
+
+    // Смещаемся вправо
+    $currentColumn++;
+}
+
+
+foreach ($list as $row) {
+  $startLine++;
+    // Указатель на первый столбец
+    $currentColumn = $columnPosition;
+    $sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $row[0] -> initials);
+	$sheet->setCellValueByColumnAndRow($currentColumn+1, $startLine, $row[1] -> value);
+$sheet->setCellValueByColumnAndRow($currentColumn+2, $startLine, $row[2] -> value);
+$sheet->setCellValueByColumnAndRow($currentColumn+3, $startLine, $row[3] -> value);
+
+}
+
+
+$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
+$filename = "List.xls";
+$objWriter->save($filename);   
+return $filename;
+	}
 
 	function get_new_marks($list)
 	{
@@ -103,7 +174,7 @@
 
 	function get_list($group, $semester, $subject_id)
 	{
-		echo "get_list: $group, $semester, $subject_id";
+		//echo "get_list: $group, $semester, $subject_id";
 		global $connection;
 		$query = "SELECT id, surname, name 
 					FROM user 
@@ -127,7 +198,7 @@
 							FROM mark 
 							WHERE subject_id = $subject_id AND student_id = '$student_id'";
 			$result2 = $connection -> query($query2);
-			if (! $result2) throw new Exception('Ошибка при запосе к БД');
+			if (! $result2) throw new Exception('Ошибка при запросе к БД');
 			$result2 -> data_seek(0);
 			while ($mark = $result2 -> fetch_array(MYSQLI_ASSOC))
 				$row[$mark['attestation_number']] = new Mark($mark['id'], $mark['mark']);
@@ -209,7 +280,7 @@
 	
 	function read_exel_file($file_path)
 	{
-		require_once "phpexcel/PHPExcel.php"; //подключаем наш фреймворк
+		require_once "phpexcel/PHPExcel.php"; //подключаем фреймворк
 		$ar = array(); // инициализируем массив
 		$input_file_type = PHPExcel_IOFactory :: identify($file_path);  // узнаем тип файла, excel может хранить файлы в разных форматах, xls, xlsx и другие
 		$reader = PHPExcel_IOFactory :: createReader($input_file_type); // создаем объект для чтения файла

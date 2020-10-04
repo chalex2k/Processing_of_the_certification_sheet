@@ -1,5 +1,4 @@
-<?php
-	// добавить всплывающие уведомления, вместо кнопок удалить можно использовать иконки корзины, некотороые ошибки фатальные, при которых программа не может дальше работать, а после некоторых можно продолжить выполнение.		 
+<?php		 
 	try
 	{
 		require('header_lect.php');
@@ -14,7 +13,7 @@
 		['title' => $title,
 		 'userstr' => $userstr,
 		 'header' => render('lect_header', []),
-		 'content' => render('lect_subjects', ['subjects' => $subjects, 'all_subjects' => $all_subj, 'notice' => $notice])]
+		 'content' => render('lect_subjects', ['subjects' => $subjects, 'all_subjects' => $all_subj, 'notice' => false])]
 		);
 	}
 	catch(Exception $exp)
