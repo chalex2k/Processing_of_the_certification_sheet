@@ -19,7 +19,6 @@
 			$group =  $_POST['group'];
 			$semester = $_POST['semester'];
 			$subject = $_POST['subject'];
-			echo "main: $group, $semester, $subject";
 			setcookie('group', $group);
 			setcookie('semester', $semester);
 			setcookie('subject_id', $subject);
