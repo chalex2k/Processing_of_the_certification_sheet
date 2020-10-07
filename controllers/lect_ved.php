@@ -129,7 +129,7 @@ $sheet->setCellValueByColumnAndRow($currentColumn+3, $startLine, $row[3] -> valu
 
 
 $objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
-$filename = "List.xls";
+$filename = "List".(string)time().".xls";
 $objWriter->save($filename);   
 return $filename;
 	}
@@ -146,7 +146,6 @@ return $filename;
 				if ( trim($mark) == '' or (int)$mark >= 0 and (int)$mark <= 50)
 					$list[$j][$i] -> new_value = $mark;
 			}
-		// done!
 	}
 
 	function get_users_subjects($user_email)
@@ -180,12 +179,13 @@ return $filename;
 					WHERE user.id IN 
 						(SELECT id
 							FROM student 
-							WHERE semester = $semester AND _group = $group)";		
+							WHERE semester = $semester AND _group = $group)
+					ORDER BY surname";		
 		$result = $connection -> query($query);
 		if (! $result) throw new Exception('Ошибка при запосе к БД');
 		$result -> data_seek(0);
 		$list = array();
-		echo($result->num_rows);
+		//echo($result->num_rows);
 		while ($student = $result -> fetch_array(MYSQLI_ASSOC))
 		{
 			//echo var_dump($student);

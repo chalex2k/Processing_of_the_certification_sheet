@@ -134,23 +134,27 @@ function getexcel(){
 			 </tr>';		}	
 	echo '
 	</table>
-	
-	 </form>
-	<div class="input-form">
+	<div class="input-form" align="center">
 
 	<input type="button" class = "save" onClick = "getdetails()"  name="save" value="Сохранить ведомость "/>
-	<input type="button" class = "lect-ved-buttons-item" onClick = "getexcel()" name="load" value="Экспорт в excel"></button>   </div>    
-	</div>  
+	</div>
+	 </form>
+	 
+	  </div>  
 	   </div> </div>';
 
-	echo '<div class= "input-form">';
+	echo '<div class= "input-form">
+	<div class="ved-text">Импорт\Экспорт </div>';
+	echo''    ;
 	echo ('<!-- Тип кодирования данных, enctype, ДОЛЖЕН БЫТЬ указан ИМЕННО так -->
+
 <form enctype="multipart/form-data" action="lect_ved.php" method="POST">
-    <!-- Поле MAX_FILE_SIZE должно быть указано до поля загрузки файла -->
+<input type="button" class = "excel-btn" onClick = "getexcel()" name="load" value="Экспорт в excel"></button>   
+   <!-- Поле MAX_FILE_SIZE должно быть указано до поля загрузки файла -->
     <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
     <!-- Название элемента input определяет имя в массиве $_FILES -->
-    Загрузить из файла excel: <input name="user_file" type="file" />
-    <input type="submit" name = "send" value="Отправить файл" />
+    | Загрузить из файла excel: <input name="user_file" type="file" class = "inputfile" />
+    <input type="submit" name = "send" class = "excel-btn" value="Отправить файл" />
 </form>');
 echo '<div id="msg"></div>';
 	echo "</div>";

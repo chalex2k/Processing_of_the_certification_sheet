@@ -350,15 +350,6 @@ button.del:hover {
 	background-color: #faa2a0;
 }
 
-button.save {
-	margin: 0 35 auto;
-	width: 30%;
-	height: 35px;
-	border: 1px solid #c4c0b0;
-	font-size: 17px;
-	color: #3d3735;
-}
-
 .lect-ved{
 	display: flex;
 	width: 100%;
@@ -409,8 +400,20 @@ div.subject-name select {
 	margin: 10px 5px;
 }
 
-.input-form{
+.save{
 	margin: 0 35 auto;
+	width: 60%;
+	height: 32px;
+	font-size: 15px;
+	margin-bottom: 15px;
+	color: #3d3735;
 }
 
+.input-form {
+	padding: 5px 10px 15px 50px;
+}
+
+.ved-text{
+	font-size: 15px;
+}
 
