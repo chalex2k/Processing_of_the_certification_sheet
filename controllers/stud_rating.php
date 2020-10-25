@@ -1,7 +1,7 @@
 <?php
 	$title = "Рейтинг";
 	require_once 'header_stud.php';
-	require_once 'login.php';
+	require_once '../service/login.php';
 	require_once '../service/functions.php';
 	require_once 'stud_functions.php';
 	require_once '../service/check_access.php';

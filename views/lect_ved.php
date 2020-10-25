@@ -1,73 +1,4 @@
-<script>
-function getdetails(){
-	let a1 = [];
-	let a2 = [];
-	let a3 = [];
-	console.log(Number(document.getElementById('count_of_students').value));
-	for(let i = 0; i < Number(document.getElementById('count_of_students').value); i++){
-    //a1[i] = $('input[name="att1"]')[i].val();
-	a1.push(document.getElementsByName('att1')[i].value);
-	a2.push(document.getElementsByName('att2')[i].value);
-	a3.push(document.getElementsByName('att3')[i].value);
-	}
-    $.ajax({
-        type: "POST",
-        url: "lect_ved.php",
-        data: {save:true, att1:a1, att2:a2, att3:a3}
-    }).done(function(result)
-        {
-            //$("#msg").html( " Request is " + result );
-        });
-}
-
-function readCookie(name) {
-	var name_cook = name+"=";
-	var spl = document.cookie.split(";");
-	
-	for(var i=0; i<spl.length; i++) {
-		var c = spl[i];
-		while(c.charAt(0) == " ") {
-			c = c.substring(1, c.length);
-		}
-		if(c.indexOf(name_cook) == 0) {	
-			return c.substring(name_cook.length, c.length);
-		}
-	}
-}
-
-function getexcel(){
-	let a1 = [];
-	let a2 = [];
-	let a3 = [];
-	console.log(Number(document.getElementById('count_of_students').value));
-	for(let i = 0; i < Number(document.getElementById('count_of_students').value); i++){
-    //a1[i] = $('input[name="att1"]')[i].val();
-	a1.push(document.getElementsByName('att1')[i].value);
-	a2.push(document.getElementsByName('att2')[i].value);
-	a3.push(document.getElementsByName('att3')[i].value);
-	}
-    $.ajax({
-        type: "POST",
-        url: "lect_ved.php",
-        data: {load:true, att1:a1, att2:a2, att3:a3}
-    }).done(function(result)
-        {
-            //$("#msg").html( " Request is " + result );
-	    //console.log(readCookie("fn"));
-	var pdflink = readCookie("fn");
-	var link = document.createElement('a');
-	//pdflink - путь к файлу		
-	link.setAttribute('href', pdflink); 
-	//pdfname - имя файла для загрузки (как он будет называться у посетителя)
-	link.setAttribute('download', "ved.xls");
-	link.setAttribute('target','_blank');
-	link.style.display = 'none';
-	document.body.appendChild(link); 
-	link.click(); 
-	document.body.removeChild(link);
-        });
-}
-</script>
+<script src="../js/lect_ved.js"> </script>
 
 <div class = 'lect-ved'>
 	<div class='lect-ved-item'>
@@ -121,42 +52,41 @@ function getexcel(){
 		<?php if($table)
 	{
 		$cnt = count($list);
-	echo ("<form method='POST' action='lect_ved.php'>
-	<input type='hidden' name='count_of_students' id='count_of_students' value='$cnt'>
-		<table class='ved'>");
-	echo '<tr id="hat"><th id="subject">Студент</th><th>1</th><th>2</th><th>3</th></tr>';
-	foreach ($list as $row) // если не все оценки стоят?
-	{
-		echo '<tr> <td id="subject">' . $row[0] -> initials . '</td>
-				   <td><input type="text" class="input-mark" name="att1" value="' . $row[1] -> value . '"></td>
-				   <td><input type="text" class="input-mark" name="att2" value="' . $row[2] -> value . '"></td>
-				   <td><input type="text" class="input-mark" name="att3" value="' . $row[3] -> value . '"></td>
-			 </tr>';		}	
+		echo ("<form method='POST' action='lect_ved.php'>
+			<input type='hidden' name='count_of_students' id='count_of_students' value='$cnt'>
+			<table class='ved'>");
+				echo '<tr id="hat"><th id="subject">Студент</th><th>1</th><th>2</th><th>3</th></tr>';
+				foreach ($list as $row) // если не все оценки стоят?
+				{
+					echo '<tr> <td id="subject">' . $row[0] -> initials . '</td>
+						<td><input type="text" class="input-mark" name="att1" value="' . $row[1] -> value . '"></td>
+						<td><input type="text" class="input-mark" name="att2" value="' . $row[2] -> value . '"></td>
+						<td><input type="text" class="input-mark" name="att3" value="' . $row[3] -> value . '"></td>
+						</tr>';		
+				}	
 	echo '
 	</table>
 	<div class="input-form" align="center">
-
-	<input type="button" class = "save" onClick = "getdetails()"  name="save" value="Сохранить ведомость "/>
+		<input type="button" class = "save" onClick = "getdetails()"  name="save" value="Сохранить ведомость "/>
 	</div>
-	 </form>
+	</form>
 	 
-	  </div>  
-	   </div> </div>';
+	 </div>  
+	 </div> </div>';
 
 	echo '<div class= "input-form">
 	<div class="ved-text">Импорт\Экспорт </div>';
 	echo''    ;
-	echo ('<!-- Тип кодирования данных, enctype, ДОЛЖЕН БЫТЬ указан ИМЕННО так -->
-
-<form enctype="multipart/form-data" action="lect_ved.php" method="POST">
-<input type="button" class = "excel-btn" onClick = "getexcel()" name="load" value="Экспорт в excel"></button>   
-   <!-- Поле MAX_FILE_SIZE должно быть указано до поля загрузки файла -->
-    <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
-    <!-- Название элемента input определяет имя в массиве $_FILES -->
-    | Загрузить из файла excel: <input name="user_file" type="file" class = "inputfile" />
-    <input type="submit" name = "send" class = "excel-btn" value="Отправить файл" />
-</form>');
-echo '<div id="msg"></div>';
+	echo ('
+		<form enctype="multipart/form-data" action="lect_ved.php" method="POST">
+		<input type="button" class = "excel-btn" onClick = "getexcel()" name="load" value="Экспорт в excel"></button>   
+		<!-- Поле MAX_FILE_SIZE должно быть указано до поля загрузки файла -->
+		<input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+		<!-- Название элемента input определяет имя в массиве $_FILES -->
+		| Загрузить из файла excel: <input name="user_file" type="file" class = "inputfile" />
+		<input type="submit" name = "send" class = "excel-btn" value="Отправить файл" />
+		</form>');
+	echo '<div id="msg"></div>';
 	echo "</div>";
 	echo "</div>";
 	}

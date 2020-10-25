@@ -1,5 +1,4 @@
 <?php
-/* вспомогательные функции */
  
 function render($template,$vars = array()){
  

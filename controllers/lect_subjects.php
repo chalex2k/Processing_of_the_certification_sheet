@@ -2,7 +2,7 @@
 	try
 	{
 		require('header_lect.php');
-		require('render.php');
+		require('../service/render.php');
 		$subjects = get_users_subjects($user_email);
 		$notice = '';
 		if (add_subject($user_email, $notice) || delete_subject($subjects, $user_email, $notice))

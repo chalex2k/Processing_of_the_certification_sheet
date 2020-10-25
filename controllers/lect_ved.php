@@ -1,10 +1,8 @@
-<?php      					// todo сохранение с помощью ajax.  обработка ситуации, когда оценки за какую-то аттестацию нет.  Проверка оценок которые пришли от пользователя
-			// todo если нет студентов, не отображать кнопку сохранить.  при сохранении поля в первой форме должны оставаться заполнены прошлыми данными.
-			// todo удалять файл ведомости после обработки
+<?php
 	try
 	{
 		require_once 'header_lect.php';  
-		require 'render.php' ;
+		require '../service/render.php' ;
 		
 		$ok = false;
 		$send = false;
@@ -31,14 +29,12 @@
 			{ // Проверяем, загрузил ли пользователь файл
 				$destiation_dir = dirname(__FILE__) .'/' . $_FILES['user_file']['name']; // Директория для размещения файла
 				move_uploaded_file($_FILES['user_file']['tmp_name'], $destiation_dir ); // Перемещаем файл в желаемую директорию
-				//echo 'File Uploaded';  // Оповещаем пользователя об успешной загрузке файла
 				$arr = read_exel_file($_FILES['user_file']['name']);
-				// echo("<br>". $_FILES['user_file']['name']);
 				$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id']);	
 				update_list_from_file($arr, $list);
 				set_new_marks($list);
 				$send = true;
-				unlink($destiation_dir); //?
+				unlink($destiation_dir);
 			}
 		}
 		if (isset($_POST['save']))
@@ -55,7 +51,6 @@
 		{
 			$list = get_list($_COOKIE['group'], $_COOKIE['semester'], $_COOKIE['subject_id'], $connection);
 			$file = create_file($list);
-			//echo ("$file");
 			setcookie('fn', $file);
 		}
 		$subjects = get_users_subjects($user_email);
@@ -70,68 +65,39 @@
 		return render('error', ['error_msg' => $exp->getMessage()]);
 	}
 
+	
 	function create_file($list)
 	{
-        	require_once "../phpexcel/Classes/PHPExcel.php";
-                                                    
-$document = new \PHPExcel();
+        	require_once "../phpexcel/Classes/PHPExcel.php";                                    
+		$document = new \PHPExcel();
+		$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
+		$columnPosition = 0; // Начальная координата x
+		$startLine = 2; // Начальная координата y
+		// Массив с названиями столбцов
+		$columns = ['Студент', '1', '2', '3'];
+		// Указатель на первый столбец
+		$currentColumn = $columnPosition;
+		// Формируем шапку
+		foreach ($columns as $column) 
+		{
+    			$sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $column);
+    			$currentColumn++;
+		}
+		foreach ($list as $row)
+		{
+  			$startLine++;
+    			// Указатель на первый столбец
+    			$currentColumn = $columnPosition;
+    			$sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $row[0] -> initials);
+			$sheet->setCellValueByColumnAndRow($currentColumn+1, $startLine, $row[1] -> value);
+			$sheet->setCellValueByColumnAndRow($currentColumn+2, $startLine, $row[2] -> value);
+			$sheet->setCellValueByColumnAndRow($currentColumn+3, $startLine, $row[3] -> value);
+		}
 
-$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
-
-$columnPosition = 0; // Начальная координата x
-$startLine = 2; // Начальная координата y
-
-// Вставляем заголовок в "A2" 
-//$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, 'Our cats');
-
-// Выравниваем по центру
-//$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(
-//    PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-
-// Объединяем ячейки "A2:C2"
-//$document->getActiveSheet()->mergeCellsByColumnAndRow($columnPosition, $startLine, $columnPosition+2, $startLine);
-
-// Перекидываем указатель на следующую строку
-//$startLine++;
-
-// Массив с названиями столбцов
-$columns = ['Студент', '1', '2', '3'];
-
-// Указатель на первый столбец
-$currentColumn = $columnPosition;
-
-// Формируем шапку
-foreach ($columns as $column) {
-    // Красим ячейку
-    //$sheet->getStyleByColumnAndRow($currentColumn, $startLine)
-     //   ->getFill()
-     //  ->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)
-     //  ->getStartColor()
-     //   ->setRGB('4dbf62');
-
-    $sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $column);
-
-    // Смещаемся вправо
-    $currentColumn++;
-}
-
-
-foreach ($list as $row) {
-  $startLine++;
-    // Указатель на первый столбец
-    $currentColumn = $columnPosition;
-    $sheet->setCellValueByColumnAndRow($currentColumn, $startLine, $row[0] -> initials);
-	$sheet->setCellValueByColumnAndRow($currentColumn+1, $startLine, $row[1] -> value);
-$sheet->setCellValueByColumnAndRow($currentColumn+2, $startLine, $row[2] -> value);
-$sheet->setCellValueByColumnAndRow($currentColumn+3, $startLine, $row[3] -> value);
-
-}
-
-
-$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
-$filename = "List".(string)time().".xls";
-$objWriter->save($filename);   
-return $filename;
+		$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
+		$filename = "List".(string)time().".xls";
+		$objWriter->save($filename);   
+		return $filename;
 	}
 
 	function get_new_marks($list)
@@ -327,11 +293,7 @@ return $filename;
 					$max_count_string_in_column = $count_string;
 					$ind_max_count_string = $col;}
 			}
-		}						
-		//if ($ind_max_count_string != -1)
-		//	echo "Фамилии найдены. Столбец с номером $ind_max_count_string <br>";
-		//else echo "Студенты не найдены в ведомости <br>";
-		
+		}							
 		$initials_index = $ind_max_count_string;
 		$initials_count = $max_count_string_in_column;
 		$marks = array();
@@ -359,12 +321,7 @@ return $filename;
 			}
 m1:		
 		}					
-			$cm = count($marks);
-			//echo " Найдено $cm аттестаций в <br>";
-			//foreach( $marks as $key => $val)
-			//	echo " $val			<br>";
-			//echo "столбцах <br>";
-		
+		$cm = count($marks);
 		
 		foreach ($list as $index => $row)
 		{

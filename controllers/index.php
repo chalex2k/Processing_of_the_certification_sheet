@@ -1,5 +1,5 @@
 <?php
-require_once "render.php";
+require_once "../service/render.php";
 require_once "start.php";
 try {
     switch ($who)
@@ -21,11 +21,6 @@ try {
 catch (Exception $exc) {
     return render('error', []);
 }
-
-
-
-
-
 
 
 ?>

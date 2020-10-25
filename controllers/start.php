@@ -19,9 +19,9 @@
 	else
 		$loggedin = FALSE;
 	
-	require_once 'login.php';
+	require_once '../service/login.php';
 	$connection = new mysqli($hostname, $username, $password, $database);
-	if ($connection->connect_error) throw new Exception("Ошибка при запосе к БД $connection->connect_error");
+	if ($connection->connect_error) throw new Exception("Ошибка при запросе к БД $connection->connect_error");
 	query_mysql($connection, "SET NAMES utf8");
 
 ?>

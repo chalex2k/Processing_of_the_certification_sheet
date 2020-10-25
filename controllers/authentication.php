@@ -1,5 +1,5 @@
 <?php
-require_once "render.php";
+require_once "../service/render.php";
 require_once "start.php";
 require_once "../service/encrypt.php";
 

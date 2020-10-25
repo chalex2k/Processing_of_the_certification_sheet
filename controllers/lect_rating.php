@@ -2,7 +2,7 @@
 	try
 	{
 		require('header_lect.php');
-		require('render.php');
+		require('../service/render.php');
 		$subjects = get_users_subjects($user_email);
 		$ok = false;
 		$rating = Null;
